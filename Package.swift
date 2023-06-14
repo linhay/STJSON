@@ -2,13 +2,13 @@
 import PackageDescription
 
 let package = Package(
-    name: "SwiftyJSON",
+    name: "STJSON",
     products: [
-        .library(name: "SwiftyJSON", targets: ["SwiftyJSON"])
+        .library(name: "STJSON", targets: ["STJSON"])
     ],
     targets: [
-        .target(name: "SwiftyJSON", dependencies: []),
-        .testTarget(name: "SwiftJSONTests", dependencies: ["SwiftyJSON"])
+        .target(name: "STJSON", dependencies: []),
+        .testTarget(name: "SwiftJSONTests", dependencies: ["STJSON"])
     ],
     swiftLanguageVersions: [.v5]
 )
