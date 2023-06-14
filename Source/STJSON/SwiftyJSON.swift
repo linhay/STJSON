@@ -25,12 +25,12 @@ import Foundation
 // MARK: - Error
 // swiftlint:disable line_length
 public enum SwiftyJSONError: Int, Swift.Error {
-    case unsupportedType = 999
+    case unsupportedType  = 999
     case indexOutOfBounds = 900
-    case elementTooDeep = 902
-    case wrongType = 901
-    case notExist = 500
-    case invalidJSON = 490
+    case elementTooDeep   = 902
+    case wrongType        = 901
+    case notExist         = 500
+    case invalidJSON      = 490
 }
 
 extension SwiftyJSONError: CustomNSError {

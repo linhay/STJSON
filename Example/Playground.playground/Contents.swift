@@ -8,7 +8,7 @@ You must have to build `SwiftyJSON iOS` package for import.
 /*:
 ### Basic setting for playground
 */
-import SwiftyJSON
+import STJSON
 import Foundation
 
 var jsonData: Data?
