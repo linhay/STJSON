@@ -40,6 +40,14 @@ public extension JSON {
         return true
     }
 
+    var keys: [String] {
+        dictionaryValue.keys.map({ $0 })
+    }
+    
+    var dictionaryObjectValue: [String: Any] {
+        dictionaryObject ?? [:]
+    }
+    
 }
 
 public extension LazyMapSequence where Base == [String], Element == JSON {

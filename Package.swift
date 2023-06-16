@@ -4,11 +4,14 @@ import PackageDescription
 let package = Package(
     name: "STJSON",
     products: [
-        .library(name: "STJSON", targets: ["STJSON"])
+        .library(name: "STJSON", targets: ["STJSON"]),
+        .library(name: "STJSONSchema", targets: ["STJSONSchema"])
     ],
     targets: [
         .target(name: "STJSON", dependencies: []),
-        .testTarget(name: "SwiftJSONTests", dependencies: ["STJSON"])
+        .target(name: "STJSONSchema", dependencies: ["STJSON"]),
+        .testTarget(name: "SwiftJSONTests", dependencies: ["STJSON"]),
+        .testTarget(name: "STJSONSchemaTests", dependencies: ["STJSONSchema"])
     ],
     swiftLanguageVersions: [.v5]
 )
