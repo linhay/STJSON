@@ -22,6 +22,16 @@
 
 import Foundation
 
+extension JSON: Equatable, Hashable {
+    
+    public func hash(into hasher: inout Hasher) {
+        if let data = try? rawData() {
+            hasher.combine(data)
+        }
+    }
+    
+}
+
 public extension JSON {
 
     subscript(keys keys: String...) -> LazyMapSequence<[String], JSON> {

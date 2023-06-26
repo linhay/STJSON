@@ -1,7 +1,7 @@
 import Foundation
 import STJSON
 
-public struct Schema {
+public struct JSONSchema {
     
     public enum Kind: String {
         case object  = "object"
@@ -36,57 +36,61 @@ public struct Schema {
     }
     
     public func validate(_ data: Any) throws -> ValidationResult {
-        let validator = try validator(for: schema)
+        let validator = try JSONSchema.validator(for: schema)
         return try validator.validate(instance: data)
     }
     
     public func validate(_ data: Any) throws -> AnySequence<ValidationError> {
-        let validator = try validator(for: schema)
+        let validator = try JSONSchema.validator(for: schema)
         return try validator.validate(instance: data)
     }
 }
 
-
-func validator(for schema: [String: Any]) throws -> Validator {
-    guard schema.keys.contains("$schema") else {
-        // Default schema
-        return Draft202012Validator(schema: schema)
-    }
+public extension JSONSchema {
     
-    guard let schemaURI = schema["$schema"] as? String else {
+  private static func validator(for schema: [String: Any]) throws -> Validator {
+        guard schema.keys.contains("$schema") else {
+            // Default schema
+            return Draft202012Validator(schema: schema)
+        }
+        
+        guard let schemaURI = schema["$schema"] as? String else {
+            throw ReferenceError.notFound
+        }
+        
+        if let id = DRAFT_2020_12_META_SCHEMA["$id"] as? String, urlEqual(schemaURI, id) {
+            return Draft202012Validator(schema: schema)
+        }
+        
+        if let id = DRAFT_2019_09_META_SCHEMA["$id"] as? String, urlEqual(schemaURI, id) {
+            return Draft201909Validator(schema: schema)
+        }
+        
+        if let id = DRAFT_07_META_SCHEMA["$id"] as? String, urlEqual(schemaURI, id) {
+            return Draft7Validator(schema: schema)
+        }
+        
+        if let id = DRAFT_06_META_SCHEMA["$id"] as? String, urlEqual(schemaURI, id) {
+            return Draft6Validator(schema: schema)
+        }
+        
+        if let id = DRAFT_04_META_SCHEMA["id"] as? String, urlEqual(schemaURI, id) {
+            return Draft4Validator(schema: schema)
+        }
+        
         throw ReferenceError.notFound
     }
-    
-    if let id = DRAFT_2020_12_META_SCHEMA["$id"] as? String, urlEqual(schemaURI, id) {
-        return Draft202012Validator(schema: schema)
-    }
-    
-    if let id = DRAFT_2019_09_META_SCHEMA["$id"] as? String, urlEqual(schemaURI, id) {
-        return Draft201909Validator(schema: schema)
-    }
-    
-    if let id = DRAFT_07_META_SCHEMA["$id"] as? String, urlEqual(schemaURI, id) {
-        return Draft7Validator(schema: schema)
-    }
-    
-    if let id = DRAFT_06_META_SCHEMA["$id"] as? String, urlEqual(schemaURI, id) {
-        return Draft6Validator(schema: schema)
-    }
-    
-    if let id = DRAFT_04_META_SCHEMA["id"] as? String, urlEqual(schemaURI, id) {
-        return Draft4Validator(schema: schema)
-    }
-    
-    throw ReferenceError.notFound
-}
 
 
-public func validate(_ value: Any, schema: [String: Any]) throws -> ValidationResult {
-    return try validator(for: schema).validate(instance: value)
-}
+    static func validate(_ value: Any, schema: [String: Any]) throws -> ValidationResult {
+        return try validator(for: schema).validate(instance: value)
+    }
 
 
-public func validate(_ value: Any, schema: Bool) throws -> ValidationResult {
-    let validator = Draft4Validator(schema: schema)
-    return try validator.validate(instance: value)
+    static func validate(_ value: Any, schema: Bool) throws -> ValidationResult {
+        let validator = Draft4Validator(schema: schema)
+        return try validator.validate(instance: value)
+    }
+
+    
 }
