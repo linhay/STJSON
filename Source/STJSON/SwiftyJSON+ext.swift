@@ -32,6 +32,26 @@ extension JSON: Equatable, Hashable {
     
 }
 
+extension JSON {
+    
+    public var decimal: Decimal? {
+        get { return number?.decimalValue }
+        set {
+            if let newValue = newValue {
+                object = NSNumber(nonretainedObject: newValue)
+            } else {
+                object = NSNull()
+            }
+        }
+    }
+    
+    public var decimalValue: Decimal {
+        get { return numberValue.decimalValue }
+        set { object = NSNumber(nonretainedObject: newValue) }
+    }
+    
+}
+
 public extension JSON {
 
     subscript(keys keys: String...) -> LazyMapSequence<[String], JSON> {
