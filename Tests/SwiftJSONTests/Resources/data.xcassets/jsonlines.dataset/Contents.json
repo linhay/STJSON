@@ -1,0 +1,12 @@
+{
+  "data" : [
+    {
+      "filename" : "jsonlines.jsonl",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

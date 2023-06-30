@@ -10,6 +10,8 @@ import Foundation
 /// https://jsonlines.org/
 public struct JSONLines {
     
+    public init() {}
+    
 }
 
 public extension JSONLines {

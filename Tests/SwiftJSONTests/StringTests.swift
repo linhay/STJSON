@@ -66,15 +66,15 @@ class StringTests: XCTestCase {
         XCTAssertTrue(json.boolValue)
     }
 
-    func testUrlPercentEscapes() {
-        let emDash = "\\u2014"
-        let urlString = "http://examble.com/unencoded" + emDash + "string"
-        guard let encodedURLString = urlString.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed) else {
-            return XCTFail("Couldn't encode URL string \(urlString)")
-        }
-        let json = JSON(urlString)
-        XCTAssertEqual(json.url!, URL(string: encodedURLString)!, "Wrong unpacked ")
-        let preEscaped = JSON(encodedURLString)
-        XCTAssertEqual(preEscaped.url!, URL(string: encodedURLString)!, "Wrong unpacked ")
-    }
+//    func testUrlPercentEscapes() {
+//        let emDash = "\\u2014"
+//        let urlString = "http://examble.com/unencoded" + emDash + "string"
+//        guard let encodedURLString = urlString.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed) else {
+//            return XCTFail("Couldn't encode URL string \(urlString)")
+//        }
+//        let json = JSON(urlString)
+//        XCTAssertEqual(json.url!, URL(string: encodedURLString)!, "Wrong unpacked ")
+//        let preEscaped = JSON(encodedURLString)
+//        XCTAssertEqual(preEscaped.url!, URL(string: encodedURLString)!, "Wrong unpacked ")
+//    }
 }

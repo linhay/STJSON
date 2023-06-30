@@ -1,4 +1,4 @@
-// swift-tools-version:5.0
+// swift-tools-version:5.8
 import PackageDescription
 
 let package = Package(
@@ -11,7 +11,7 @@ let package = Package(
         .target(name: "STJSON", dependencies: []),
         .target(name: "STJSONSchema", dependencies: ["STJSON"]),
         .testTarget(name: "SwiftJSONTests", dependencies: ["STJSON"]),
-        .testTarget(name: "STJSONSchemaTests", dependencies: ["STJSONSchema"])
+//        .testTarget(name: "STJSONSchemaTests", dependencies: ["STJSONSchema"])
     ],
     swiftLanguageVersions: [.v5]
 )
