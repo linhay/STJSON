@@ -45,14 +45,10 @@ private extension JSONLines {
     
     func _encode(_ data: [Data]) throws -> Data {
         guard let separator = "\n".data(using: .utf8) else {
-            throw JSONLinesError.invalidData
+            throw STJSONError.invalidData
         }
         return Data(data.joined(separator: separator))
     }
     
     
-}
-
-enum JSONLinesError: Error {
-    case invalidData
 }
