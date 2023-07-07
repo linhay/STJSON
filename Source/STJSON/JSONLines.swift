@@ -28,7 +28,7 @@ public extension JSONLines {
         try _decode(string).map({ try encoder.decode(C.self, from: $0) })
     }
     
-    func encode(_ jsons: [Encodable], encoder: JSONEncoder) throws -> Data {
+    func encode(_ jsons: [any Encodable], encoder: JSONEncoder) throws -> Data {
         try _encode(try jsons.map({ try encoder.encode($0) }))
     }
     
