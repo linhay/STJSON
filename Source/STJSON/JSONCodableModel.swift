@@ -33,7 +33,7 @@ public extension JSONDecodableModel {
 
 public extension Encodable where Self: JSONDecodableModel {
     
-    var json: Any {
+    var jsonValue: Any {
         get throws {
             let data = try JSONEncoder().encode(self)
             return try JSONSerialization.jsonObject(with: data, options: .allowFragments)
