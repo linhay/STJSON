@@ -1,5 +1,5 @@
 # 1
-FROM swiftlang/swift:nightly-5.9-jammy
+FROM swiftlang/swift:nightly-5.7-jammy
 WORKDIR /app
 COPY . .
 
@@ -17,3 +17,5 @@ RUN mv `swift build --show-bin-path` /app/bin
 # 5
 EXPOSE 8080
 ENTRYPOINT ./bin/debug/Run serve --env local --hostname 0.0.0.0
+
+# docker build . --file development.Dockerfile --tag til-app-dev
