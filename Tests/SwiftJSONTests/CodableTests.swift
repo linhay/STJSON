@@ -90,6 +90,59 @@ class CodableTests: XCTestCase {
         let model = try! JSONDecoder().decode(CodableModel.self, from: data)
         XCTAssertEqual(model.subName, "sub_name")
     }
+    
+    func testExample() throws {
+   let data = #"""
+{
+    "Meta": {
+        "1. Information": "Daily Prices (open, high, low, close) and Volumes",
+        "2. Symbol": "IBM",
+        "3. Last Refreshed": "2023-07-21",
+        "4. Output Size": "Compact",
+        "5. Time Zone": "US/Eastern"
+    },
+    "Time": {
+        "2023-07-21": {
+            "1. open": "138.2100",
+            "2. high": "139.7799",
+            "3. low": "137.7600",
+            "4. close": "138.9400",
+            "5. volume": "5858741"
+        }
+    }
+}
+"""#
+        
+        struct Payload: Codable {
+            
+            let Meta: [String: Any]
+            let Time: [String: Any]
+            
+            enum CodingKeys: CodingKey {
+                case Meta
+                case Time
+            }
+            
+            init(from decoder: Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                Meta = try container.decode([String: Any].self, forKey: .Meta)
+                Time = try container.decode([String: Any].self, forKey: .Time)
+            }
+            
+            func encode(to encoder: Encoder) throws {
+                var container = try encoder.container(keyedBy: CodingKeys.self)
+                try container.encode(Meta, forKey: .Meta)
+                try container.encode(Time, forKey: .Time)
+            }
+
+        }
+        
+        let payload = try JSONDecoder.decode(Payload.self, from: data)
+        print(payload)
+        let encode = try JSONEncoder.encode(payload)
+        print(String.init(data: encode, encoding: .utf8))
+}
+
 }
 
 private struct CodableModel: Codable {
