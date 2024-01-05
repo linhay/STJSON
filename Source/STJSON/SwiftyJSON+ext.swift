@@ -32,13 +32,13 @@ extension JSON: Equatable, Hashable {
     
 }
 
-extension JSON {
+public extension JSON {
     
-    public var decimal: Decimal? {
+     var decimal: Decimal? {
         get { return number?.decimalValue }
     }
     
-    public var decimalValue: Decimal {
+     var decimalValue: Decimal {
         get { return numberValue.decimalValue }
     }
     

@@ -68,3 +68,11 @@ public extension JSONEncoder {
     }
     
 }
+
+public extension JSON {
+    
+    func decode<T>(_ type: T.Type, decoder: JSONDecoder = JSONDecoder.shared) throws -> T where T : Decodable {
+        return try decoder.decode(type, from: self.rawData())
+    }
+    
+}
