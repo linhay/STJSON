@@ -41,6 +41,8 @@ public extension JSONDecoder {
 
 public extension JSONEncoder {
     
+    public typealias EncoderBuilder = (_ encoder: inout JSONEncoder) -> Void
+    
     static var shared: JSONEncoder = {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .secondsSince1970
@@ -48,14 +50,22 @@ public extension JSONEncoder {
         return encoder
     }()
     
-    static func new(_ builder: (_ encoder: JSONEncoder) -> Void) -> JSONEncoder {
-        let encoder = JSONEncoder()
-        builder(encoder)
+    static func new(_ builder: EncoderBuilder) -> JSONEncoder {
+        var encoder = JSONEncoder()
+        builder(&encoder)
         return encoder
+    }
+    
+    static func encode<T>(_ value: T, builder: EncoderBuilder) throws -> Data where T : Encodable {
+        try encode(value, encoder: new(builder))
     }
     
     static func encode<T>(_ value: T, encoder: JSONEncoder = shared) throws -> Data where T : Encodable {
         try encoder.encode(value)
+    }
+    
+    static func encodeToJSON<T>(_ value: T, builder: EncoderBuilder) throws -> String where T : Encodable {
+        try encodeToJSON(value, encoder: new(builder))
     }
     
     static func encodeToJSON<T>(_ value: T, encoder: JSONEncoder = shared) throws -> String where T : Encodable {
