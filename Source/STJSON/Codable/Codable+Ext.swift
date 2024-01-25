@@ -85,4 +85,8 @@ public extension JSON {
         return try decoder.decode(type, from: self.rawData())
     }
     
+    func decode<T: JSONDecodableModel>(json type: T.Type) throws -> T where T : JSONDecodableModel {
+        return try type.init(from: self)
+    }
+    
 }

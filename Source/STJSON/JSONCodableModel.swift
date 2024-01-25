@@ -7,69 +7,51 @@
 
 import Foundation
 
-typealias JSONCodableModel = JSONDecodableModel & JSONEncodableModel
+public typealias JSONCodableModel = JSONDecodableModel & JSONEncodableModel
 
 public protocol JSONDecodableModel {
     
-    var jsonValue: Any { get throws }
+    init(from json: JSON) throws
+    
+}
+
+public protocol JSONEncodableModel {
+    
+    func decode() throws -> JSON
+
+}
+
+public extension Encodable where Self: JSONDecodableModel {
+    
+    func decode() throws -> JSON {
+        let data = try JSONEncoder().encode(self)
+        return try JSON(data: data)
+    }
+    
+}
+
+public extension Array where Element: JSONEncodableModel {
+    
+    func decode() throws -> JSON {
+        return try JSON([self.map({ try $0.decode() })])
+    }
     
 }
 
 public extension JSONDecodableModel {
     
-    var dictionaryValue: [String: Any] {
-        get throws {
-            guard let dictionary = try jsonValue as? [String: Any] else {
-                throw STJSONError.decode
-            }
-            return dictionary
-        }
-    }
-    
-    var json: Any? { try? jsonValue }
-    var dictionary: [String: Any]? { try? dictionaryValue }
-    
-}
-
-public extension Encodable where Self: JSONDecodableModel {
-    
-    var jsonValue: Any {
-        get throws {
-            let data = try JSONEncoder().encode(self)
-            return try JSONSerialization.jsonObject(with: data, options: .allowFragments)
-        }
-    }
-    
-}
-
-public extension Array where Element: JSONDecodableModel {
-    
-    var jsonValue: [Any] {
-        get throws {
-            try self.map({ try $0.jsonValue })
-        }
-    }
-    
-}
-
-public protocol JSONEncodableModel {
-    init(from json: JSON) throws
-}
-
-public extension JSONEncodableModel {
-    
     init(from data: Data) throws {
         try self.init(from: JSON(data: data))
     }
     
-    init?(exist json: JSON) throws {
+    init?(from json: JSON) throws {
         guard json.isExists else { return nil }
         try self.init(from: json)
     }
     
 }
 
-extension Array: JSONEncodableModel where Element: JSONEncodableModel {
+extension Array: JSONDecodableModel where Element: JSONDecodableModel {
     
     public init(from json: JSON) throws {
        self = try json.arrayValue.map(Element.init(from:))
