@@ -34,12 +34,41 @@ extension JSON: Equatable, Hashable {
 
 public extension JSON {
     
-     var decimal: Decimal? {
-        get { return number?.decimalValue }
+     var decimal: Decimal? { number?.decimalValue }
+     var decimalValue: Decimal { return numberValue.decimalValue }
+    
+}
+
+public extension JSON {
+    
+    enum DateDecodingStrategy {
+        /// Decode the `Date` as a UNIX timestamp from a JSON number.
+        case secondsSince1970
+        /// Decode the `Date` as UNIX millisecond timestamp from a JSON number.
+        case millisecondsSince1970
+        /// Decode the `Date` as a string parsed by the given formatter.
+        case formatted(DateFormatter)
+        
+        public static func formatted(_ string: String) -> DateDecodingStrategy {
+            let formatter = DateFormatter()
+            formatter.dateFormat = string
+            return .formatted(formatter)
+        }
     }
     
-     var decimalValue: Decimal {
-        get { return numberValue.decimalValue }
+    func date(_ strategy: DateDecodingStrategy) -> Date? {
+        switch strategy {
+        case .secondsSince1970:
+            return Date.init(timeIntervalSince1970: doubleValue)
+        case .millisecondsSince1970:
+            return Date.init(timeIntervalSince1970: doubleValue / 1000)
+        case .formatted(let formatter):
+            return formatter.date(from: stringValue)
+        }
+    }
+    
+    func dateValue(_ strategy: DateDecodingStrategy) -> Date {
+        self.date(strategy) ?? .distantPast
     }
     
 }

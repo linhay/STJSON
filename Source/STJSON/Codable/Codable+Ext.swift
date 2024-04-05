@@ -7,13 +7,23 @@
 
 import Foundation
 
+public extension Encodable {
+    
+    var toJSON: JSON {
+        get throws {
+            let data = try JSONEncoder.shared.encode(self)
+            return try JSON(data: data)
+        }
+    }
+    
+}
+
 public extension JSONDecoder {
     
     static var shared: JSONDecoder = {
         let decoder = JSONDecoder()
         return decoder
     }()
-    
     
     static func new(_ builder: (_ decoder: JSONDecoder) -> Void) -> JSONDecoder {
         let decoder = JSONDecoder()
