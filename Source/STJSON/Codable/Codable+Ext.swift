@@ -22,6 +22,7 @@ public extension JSONDecoder {
     
     static var shared: JSONDecoder = {
         let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .secondsSince1970
         return decoder
     }()
     
