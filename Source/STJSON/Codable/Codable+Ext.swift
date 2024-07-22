@@ -52,7 +52,7 @@ public extension JSONDecoder {
 
 public extension JSONEncoder {
     
-    public typealias EncoderBuilder = (_ encoder: inout JSONEncoder) -> Void
+    public typealias EncoderConfiguration = (_ encoder: inout JSONEncoder) -> Void
     
     static var shared: JSONEncoder = {
         let encoder = JSONEncoder()
@@ -61,22 +61,22 @@ public extension JSONEncoder {
         return encoder
     }()
     
-    static func new(_ builder: EncoderBuilder) -> JSONEncoder {
+    static func new(_ configuration: EncoderConfiguration) -> JSONEncoder {
         var encoder = JSONEncoder()
-        builder(&encoder)
+        configuration(&encoder)
         return encoder
     }
     
-    static func encode<T>(_ value: T, builder: EncoderBuilder) throws -> Data where T : Encodable {
-        try encode(value, encoder: new(builder))
+    static func encode<T>(_ value: T, configuration: EncoderConfiguration) throws -> Data where T : Encodable {
+        try encode(value, encoder: new(configuration))
     }
     
     static func encode<T>(_ value: T, encoder: JSONEncoder = shared) throws -> Data where T : Encodable {
         try encoder.encode(value)
     }
     
-    static func encodeToJSON<T>(_ value: T, builder: EncoderBuilder) throws -> String where T : Encodable {
-        try encodeToJSON(value, encoder: new(builder))
+    static func encodeToJSON<T>(_ value: T, configuration: EncoderConfiguration) throws -> String where T : Encodable {
+        try encodeToJSON(value, encoder: new(configuration))
     }
     
     static func encodeToJSON<T>(_ value: T, encoder: JSONEncoder = shared) throws -> String where T : Encodable {
