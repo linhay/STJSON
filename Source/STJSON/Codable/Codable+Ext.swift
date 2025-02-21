@@ -20,7 +20,7 @@ public extension Encodable {
 
 public extension JSONDecoder {
     
-    static var shared: JSONDecoder = {
+    static let shared: JSONDecoder = {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .secondsSince1970
         return decoder
@@ -50,36 +50,80 @@ public extension JSONDecoder {
     
 }
 
-public extension JSONEncoder {
+public actor CodableActor {
     
-    public typealias EncoderConfiguration = (_ encoder: inout JSONEncoder) -> Void
+    public static let shared = CodableActor()
     
-    static var shared: JSONEncoder = {
+    public init(encoder: JSONEncoder? = nil, decoder: JSONDecoder? = nil) {
+        if let encoder = encoder {
+            self.encoder = encoder
+        }
+        if let decoder = decoder {
+            self.decoder = decoder
+        }
+    }
+        
+    public var encoder: JSONEncoder = {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .secondsSince1970
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         return encoder
     }()
     
-    static func new(_ configuration: EncoderConfiguration) -> JSONEncoder {
-        var encoder = JSONEncoder()
-        configuration(&encoder)
-        return encoder
+    public var decoder: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .secondsSince1970
+        return decoder
+    }()
+    
+    public func update(encoder build: (_ item: inout JSONEncoder) -> Void) -> Self {
+        build(&encoder)
+        return self
     }
     
-    static func encode<T>(_ value: T, configuration: EncoderConfiguration) throws -> Data where T : Encodable {
-        try encode(value, encoder: new(configuration))
+    public func update(decoder build: (_ item: inout JSONDecoder) -> Void) -> Self {
+        build(&decoder)
+        return self
     }
+    
+    public func encode<T>(_ value: T) throws -> Data where T : Encodable {
+        try encoder.encode(value)
+    }
+    
+    public func decode<T>(_ type: T.Type, from data: Data) throws -> T where T : Decodable {
+        return try decoder.decode(type, from: data)
+    }
+    
+    public func decode<T>(_ type: T.Type,
+                          from string: String,
+                          using: String.Encoding = .utf8) throws -> T where T : Decodable {
+        guard let data = string.data(using: using) else {
+            throw STJSONError.decode
+        }
+        return try decoder.decode(type, from: data)
+    }
+    
+    public func encode<T>(toJSON value: T) throws -> String? where T : Encodable {
+        let data = try encoder.encode(value)
+        return String(data: data, encoding: .utf8)
+    }
+    
+}
+
+public extension JSONEncoder {
+        
+    static let shared: JSONEncoder = {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .secondsSince1970
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        return encoder
+    }()
     
     static func encode<T>(_ value: T, encoder: JSONEncoder = shared) throws -> Data where T : Encodable {
         try encoder.encode(value)
     }
     
-    static func encodeToJSON<T>(_ value: T, configuration: EncoderConfiguration) throws -> String where T : Encodable {
-        try encodeToJSON(value, encoder: new(configuration))
-    }
-    
-    static func encodeToJSON<T>(_ value: T, encoder: JSONEncoder = shared) throws -> String where T : Encodable {
+    static func encode<T>(toJSON value: T, encoder: JSONEncoder = shared) throws -> String where T : Encodable {
         let data = try encoder.encode(value)
         if let str = String(data: data, encoding: .utf8) {
             return str
