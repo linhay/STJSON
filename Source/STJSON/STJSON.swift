@@ -8,3 +8,4 @@
 import Foundation
 
 @_exported import AnyCodable
+@_exported import SwiftyJSON
