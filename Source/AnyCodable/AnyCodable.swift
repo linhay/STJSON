@@ -20,10 +20,6 @@ import Foundation
         self.value = value ?? ()
     }
     
-    public func decode<T: Decodable>(to type: T.Type) throws -> T {
-        let encoder = JSONEncoder()
-        return try JSONDecoder().decode(type, from: encoder.encode(self))
-    }
     
 }
 
