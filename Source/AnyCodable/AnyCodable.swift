@@ -13,11 +13,18 @@ import Foundation
  - SeeAlso: `AnyDecodable`
  */
 @frozen public struct AnyCodable: Codable, @unchecked Sendable {
+    
     public let value: Any
-
+    
     public init<T>(_ value: T?) {
         self.value = value ?? ()
     }
+    
+    public func decode<T: Decodable>(to type: T.Type) throws -> T {
+        let encoder = JSONEncoder()
+        return try JSONDecoder().decode(type, from: encoder.encode(self))
+    }
+    
 }
 
 extension AnyCodable: _AnyEncodable, _AnyDecodable {}
