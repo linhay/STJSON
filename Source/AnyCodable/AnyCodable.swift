@@ -42,16 +42,6 @@ extension AnyCodable: Equatable {
             return lhs == rhs
         case let (lhs as Int64, rhs as Int64):
             return lhs == rhs
-        case let (lhs as UInt, rhs as UInt):
-            return lhs == rhs
-        case let (lhs as UInt8, rhs as UInt8):
-            return lhs == rhs
-        case let (lhs as UInt16, rhs as UInt16):
-            return lhs == rhs
-        case let (lhs as UInt32, rhs as UInt32):
-            return lhs == rhs
-        case let (lhs as UInt64, rhs as UInt64):
-            return lhs == rhs
         case let (lhs as Float, rhs as Float):
             return lhs == rhs
         case let (lhs as Double, rhs as Double):
@@ -122,16 +112,6 @@ extension AnyCodable: Hashable {
         case let value as Int32:
             hasher.combine(value)
         case let value as Int64:
-            hasher.combine(value)
-        case let value as UInt:
-            hasher.combine(value)
-        case let value as UInt8:
-            hasher.combine(value)
-        case let value as UInt16:
-            hasher.combine(value)
-        case let value as UInt32:
-            hasher.combine(value)
-        case let value as UInt64:
             hasher.combine(value)
         case let value as Float:
             hasher.combine(value)
