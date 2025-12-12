@@ -58,8 +58,6 @@ extension _AnyEncodable {
         #endif
         case is Void:
             try container.encodeNil()
-        case let bool as Bool:
-            try container.encode(bool)
         case let int as Int:
             try container.encode(int)
         case let int8 as Int8:
@@ -74,6 +72,8 @@ extension _AnyEncodable {
             try container.encode(float)
         case let double as Double:
             try container.encode(double)
+        case let bool as Bool:
+            try container.encode(bool)
         case let string as String:
             try container.encode(string)
         #if canImport(Foundation)

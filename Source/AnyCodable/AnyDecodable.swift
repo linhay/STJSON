@@ -82,8 +82,6 @@ extension AnyDecodable: Equatable {
         case is (NSNull, NSNull), is (Void, Void):
             return true
 #endif
-        case let (lhs as Bool, rhs as Bool):
-            return lhs == rhs
         case let (lhs as Int, rhs as Int):
             return lhs == rhs
         case let (lhs as Int8, rhs as Int8):
@@ -97,6 +95,8 @@ extension AnyDecodable: Equatable {
         case let (lhs as Float, rhs as Float):
             return lhs == rhs
         case let (lhs as Double, rhs as Double):
+            return lhs == rhs
+        case let (lhs as Bool, rhs as Bool):
             return lhs == rhs
         case let (lhs as String, rhs as String):
             return lhs == rhs
