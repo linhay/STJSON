@@ -8,7 +8,7 @@ This file contains short, copy-pasteable Swift snippets showing common usage pat
 import AnyCodable
 import Foundation
 
-let jsonString = "{"id": 1, "name": "Alice", "meta": {"a": 1}}"
+let jsonString = #"{"id": 1, "name": "Alice", "meta": {"a": 1}}"#
 let data = Data(jsonString.utf8)
 
 let decoder = JSONDecoder()
@@ -33,8 +33,9 @@ Notes:
 
 ```swift
 import STJSON
+import Foundation
 
-let ndjson = "{"id":1}\n{"id":2}\n"
+let ndjson = #"{"id":1}"# + "\n" + #"{"id":2}"# + "\n"
 let lines = try JSONLines().decode(ndjson)
 
 // `lines` is an array of SwiftyJSON.JSON objects
