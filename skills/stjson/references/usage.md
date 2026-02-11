@@ -69,6 +69,35 @@ try JSONLines().forEachLine(from: .string(ndjson)) { json in
 print(ids) // [1, 2]
 ```
 
+2.1.1) JSONLines — unified `Source` entry (String / Data / URL)
+
+```swift
+import STJSON
+import Foundation
+
+let ndjson = #"{"id":1}"# + "\n" + #"{"id":2}"# + "\n"
+let data = Data(ndjson.utf8)
+let fileURL = URL(fileURLWithPath: "/tmp/sample.jsonl")
+
+try ndjson.write(to: fileURL, atomically: true, encoding: .utf8)
+
+let jl = JSONLines()
+
+// String source
+let a = try jl.decode(from: .string(ndjson))
+
+// Data source
+let b = try jl.decode(from: .data(data))
+
+// URL source (chunked line-by-line read)
+let c = try jl.decode(from: .url(fileURL, chunkSize: 64 * 1024))
+```
+
+Important:
+- `decode(from:)` / `forEachLine(from:)` / `compactMapLines(from:)` only accept `JSONLines.Source`.
+- If you pass `URL` directly, Swift will report: `Cannot convert value of type 'URL' to expected argument type 'JSONLines.Source'`.
+- This is intentional API simplification: keep one entry shape (`from: Source`) instead of many overloads.
+
 2.2) JSONLines — `Collection` view with `lines(_:)`
 
 ```swift
@@ -111,4 +140,4 @@ Common fixes & tips
 - If decoding fails due to type mismatch, verify the runtime JSON structure via `json.rawString()` or print debugging output before attempting Codable decoding.
 - Prefer using strong models (Codable structs) for production paths; AnyCodable is for dynamic or exploratory code paths.
 - When adding tests, follow existing tests under Tests/SwiftJSONTests and Tests/AnyCodableTests for style and expectations.
-- For large JSONLines input, prefer `forEachLine` or `lines(_:)` over eager `decode` to reduce temporary memory pressure.
+- For large JSONLines input, prefer `forEachLine(from: .url(...))`, `compactMapLines(from:)`, or `asyncLines(url:)` over eager `decode` to reduce temporary memory pressure.

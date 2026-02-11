@@ -33,6 +33,11 @@ Provide a repeatable workflow for implementing and validating STJSON, AnyCodable
 5. Run related test targets and report results.
 6. If asked for usage examples, prefer `skills/stjson/references/usage.md` and choose the smallest relevant snippet.
 7. For JSONLines memory-pressure tasks, prefer unified `Source`-based APIs (`decode(from:)`, `forEachLine(from:)`, `compactMapLines(from:)`) or `lines(_:)`, and avoid adding duplicated overloads.
+8. When users ask for URL/Data input, always show `Source` wrappers explicitly:
+   - `JSONLines.Source.string(ndjson)`
+   - `JSONLines.Source.data(data)`
+   - `JSONLines.Source.url(fileURL, chunkSize: 64 * 1024)`
+9. Explain API simplification clearly: direct `URL`/`Data` overloads were intentionally removed from sync decode/forEach/compactMap entry points to keep one stable call shape (`from: Source`) and reduce external API surface.
 
 ## Output requirements
 
