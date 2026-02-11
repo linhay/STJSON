@@ -14,7 +14,7 @@ Provide a repeatable workflow for implementing and validating STJSON, AnyCodable
 - Minimal, focused code-change workflow
 - Existing-path-first search strategy
 - Test-first guidance for bug fixes and behavior changes
-- Reference snippets in `skills/stjson/references/usage.md` (including JSONLines `forEachLine` and `lines(_:)`)
+- Reference snippets under `skills/stjson/references/` (split by topic for progressive loading)
 
 ## Repository paths worth checking first
 
@@ -31,7 +31,12 @@ Provide a repeatable workflow for implementing and validating STJSON, AnyCodable
 3. Add or update a focused test first when fixing behavior.
 4. Apply the smallest code change that makes the new/updated test pass.
 5. Run related test targets and report results.
-6. If asked for usage examples, prefer `skills/stjson/references/usage.md` and choose the smallest relevant snippet.
+6. If asked for usage examples, load only one relevant reference file first:
+   - `skills/stjson/references/anycodable.md`
+   - `skills/stjson/references/jsonlines.md`
+   - `skills/stjson/references/interop.md`
+   - `skills/stjson/references/troubleshooting.md`
+   Keep `skills/stjson/references/usage.md` as index only.
 7. For JSONLines memory-pressure tasks, prefer unified `Source`-based APIs (`decode(from:)`, `forEachLine(from:)`, `compactMapLines(from:)`) or `lines(_:)`, and avoid adding duplicated overloads.
 8. When users ask for URL/Data input, always show `Source` wrappers explicitly:
    - `JSONLines.Source.string(ndjson)`

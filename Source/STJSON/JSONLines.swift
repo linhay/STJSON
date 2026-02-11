@@ -66,7 +66,7 @@ public struct JSONLines {
         }
         
         private static func _isNewline(_ character: Character) -> Bool {
-            character == "\n" || character == "\r"
+            character.isNewline
         }
     }
     
