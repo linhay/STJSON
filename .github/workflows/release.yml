@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
 
 concurrency:
   group: release
@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   release:
-    name: Release (on push to main)
+    name: Release (on push to master)
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -44,7 +44,7 @@ jobs:
           import zipfile
           import sys
 
-          skill_path = Path("skills/STFilePath").resolve()
+          skill_path = Path("skills/stjson").resolve()
           out_dir = Path("skills/dist").resolve()
           skill_md = skill_path / "SKILL.md"
 
@@ -101,4 +101,4 @@ jobs:
           name: Release ${{ steps.version.outputs.next_tag }}
           generate_release_notes: true
           files: |
-            skills/dist/STFilePath.skill
+            skills/dist/stjson.skill
