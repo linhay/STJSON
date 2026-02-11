@@ -39,7 +39,7 @@ public extension JSONDecoder {
         guard let data = string.data(using: using) else {
             throw STJSONError.decode
         }
-        return try decode(type, from: data)
+        return try decode(type, from: data, decoder: decoder)
     }
     
     static func decode<T>(_ type: T.Type,

@@ -52,7 +52,9 @@ public extension KeyedDecodingContainer {
         var dictionary = Dictionary<String, Any>()
 
         for key in allKeys {
-            if let boolValue = try? decode(Bool.self, forKey: key) {
+            if (try? decodeNil(forKey: key)) == true {
+                dictionary[key.stringValue] = NSNull()
+            } else if let boolValue = try? decode(Bool.self, forKey: key) {
                 dictionary[key.stringValue] = boolValue
             } else if let stringValue = try? decode(String.self, forKey: key) {
                 dictionary[key.stringValue] = stringValue
@@ -75,7 +77,11 @@ public extension UnkeyedDecodingContainer {
     mutating func decode(_ type: Array<Any>.Type) throws -> Array<Any> {
         var array: [Any] = []
         while isAtEnd == false {
-            if let value = try? decode(Bool.self) {
+            if (try? decodeNil()) == true {
+                array.append(NSNull())
+            } else if let value = try? decode(Bool.self) {
+                array.append(value)
+            } else if let value = try? decode(Int.self) {
                 array.append(value)
             } else if let value = try? decode(Double.self) {
                 array.append(value)
@@ -111,6 +117,8 @@ public extension KeyedEncodingContainerProtocol where Key == JSONCodingKeys {
                 try encode(value, forKey: key)
             case let value as Double:
                 try encode(value, forKey: key)
+            case is NSNull:
+                try encodeNil(forKey: key)
             case let value as Dictionary<String, Any>:
                 try encodeIfPresent(value, forKey: key)
             case let value as Array<Any>:
@@ -153,6 +161,8 @@ public extension UnkeyedEncodingContainer {
                 try encode(value)
             case let value as Double:
                 try encode(value)
+            case is NSNull:
+                try encodeNil()
             case let value as Dictionary<String, Any>:
                 try encode(value)
             case let value as Array<Any>:

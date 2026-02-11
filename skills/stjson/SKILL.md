@@ -33,6 +33,7 @@ Provide a repeatable workflow for implementing and validating STJSON, AnyCodable
 5. Run related test targets and report results.
 6. If asked for usage examples, load only one relevant reference file first:
    - `skills/stjson/references/anycodable.md`
+   - `skills/stjson/references/codable-extensions.md`
    - `skills/stjson/references/jsonlines.md`
    - `skills/stjson/references/interop.md`
    - `skills/stjson/references/troubleshooting.md`
