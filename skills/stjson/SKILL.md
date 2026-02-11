@@ -1,6 +1,6 @@
 ---
-name: stjson
-description: Skill for working with the STJSON Swift library. Trigger when Codex needs to: (1) read or modify code under Source/STJSON or Source/AnyCodable; (2) create or update Codable and JSON encoding/decoding examples; (3) diagnose or fix tests involving STJSON, AnyCodable, or JSONLines; (4) implement or explain JSONLines streaming APIs such as forEachLine and lines(_:) Collection usage; (5) add migration notes or small API usage snippets for this repository.
+name: STJSON
+description: "Skill for working with the STJSON Swift library. Trigger when Claude needs to: (1) read or modify code under Source/STJSON or Source/AnyCodable; (2) create/modify Codable / JSON encoding/decoding examples; (3) diagnose or fix failing unit tests that involve STJSON or AnyCodable; (4) add JSONLines support, migrations, or small API docs and usage snippets for Swift projects using this repository."
 ---
 
 # STJSON Skill
