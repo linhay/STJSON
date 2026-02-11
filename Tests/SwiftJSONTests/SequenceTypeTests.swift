@@ -26,7 +26,7 @@ import STJSON
 class SequenceTypeTests: XCTestCase {
 
     func testJSONFile() {
-        if let testData = NSDataAsset(name: "Tests", bundle: .module)?.data {
+        if let testData = TestFixtureLoader.data(named: "Tests", ext: "json") {
             guard let json = try? JSON(data: testData) else {
                 XCTFail("Unable to parse the data")
                 return

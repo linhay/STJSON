@@ -30,7 +30,7 @@ class PerformanceTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        if let data = NSDataAsset(name: "Tests", bundle: .module)?.data {
+        if let data = TestFixtureLoader.data(named: "Tests", ext: "json") {
             self.testData = data
         } else {
             XCTFail("Can't find the test JSON file")

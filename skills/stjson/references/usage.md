@@ -36,7 +36,7 @@ import STJSON
 import Foundation
 
 let ndjson = #"{"id":1}"# + "\n" + #"{"id":2}"# + "\n"
-let lines = try JSONLines().decode(ndjson)
+let lines = try JSONLines().decode(from: .string(ndjson))
 
 // `lines` is an array of SwiftyJSON.JSON objects
 for json in lines {
@@ -53,6 +53,39 @@ let models: [Item] = try lines.map { json in
 
 Notes:
 - JSONLines.decode may load all objects into memory; for large streams implement an incremental reader.
+
+2.1) JSONLines — stream with `forEachLine` (lower peak memory)
+
+```swift
+import STJSON
+
+let ndjson = #"{"id":1}"# + "\n" + #"{"id":2}"# + "\n"
+var ids: [Int] = []
+
+try JSONLines().forEachLine(from: .string(ndjson)) { json in
+  ids.append(json["id"].intValue)
+}
+
+print(ids) // [1, 2]
+```
+
+2.2) JSONLines — `Collection` view with `lines(_:)`
+
+```swift
+import STJSON
+import Foundation
+
+let ndjson = "\n" + #"{"id":1}"# + "\n\n" + #"{"id":2}"# + "\n"
+let lines = JSONLines().lines(ndjson)
+
+// Standard Collection abilities
+print(lines.count) // 2
+let ids = lines.compactMap { line -> Int? in
+  let json = try? JSON(data: Data(line.utf8))
+  return json?["id"].int
+}
+print(ids) // [1, 2]
+```
 
 3) SwiftyJSON <-> Codable interop
 
@@ -78,3 +111,4 @@ Common fixes & tips
 - If decoding fails due to type mismatch, verify the runtime JSON structure via `json.rawString()` or print debugging output before attempting Codable decoding.
 - Prefer using strong models (Codable structs) for production paths; AnyCodable is for dynamic or exploratory code paths.
 - When adding tests, follow existing tests under Tests/SwiftJSONTests and Tests/AnyCodableTests for style and expectations.
+- For large JSONLines input, prefer `forEachLine` or `lines(_:)` over eager `decode` to reduce temporary memory pressure.

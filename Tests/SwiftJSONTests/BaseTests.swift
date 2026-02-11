@@ -31,7 +31,7 @@ class BaseTests: XCTestCase {
         super.setUp()
 //        let file = "./Tests/Tes/Tests.json"
 //        self.testData = try? Data(contentsOf: URL(fileURLWithPath: file))
-        if let data = NSDataAsset(name: "Tests", bundle: .module)?.data {
+        if let data = TestFixtureLoader.data(named: "Tests", ext: "json") {
             self.testData = data
         } else {
             XCTFail("Can't find the test JSON file")

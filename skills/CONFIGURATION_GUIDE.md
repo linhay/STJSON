@@ -123,3 +123,4 @@ find skills -mindepth 2 -maxdepth 2 -type f \( -name 'README.md' -o -name 'CHANG
 - 修改技能前，先更新本指南中的 BDD 场景或 TDD 清单（若规则有变化）。
 - 修改后必须跑一次第 7 节检查命令。
 - 新技能先最小可用，再按真实任务迭代 `references/` 与脚本。
+- 当仓库 API 发生能力升级（如新增 streaming/Collection 能力）时，必须同步更新对应 `SKILL.md` 的触发描述与 `references/` 示例。
