@@ -1,13 +1,13 @@
 ---
 name: STJSON
-description: "Skill for working with the STJSON Swift library. Trigger when Claude needs to: (1) read or modify code under Source/STJSON or Source/AnyCodable; (2) create/modify Codable / JSON encoding/decoding examples; (3) diagnose or fix failing unit tests that involve STJSON or AnyCodable; (4) add JSONLines support, migrations, or small API docs and usage snippets for Swift projects using this repository."
+description: "Skill for working with the STJSON Swift library. Trigger when Claude needs to: (1) read or modify code under Source/STJSON or Source/AnyCodable; (2) create/modify Codable / JSON encoding/decoding examples; (3) diagnose or fix failing unit tests that involve STJSON or AnyCodable; (4) add JSONLines support, migrations, or small API docs and usage snippets for Swift projects using this repository; (5) add or maintain JSON-RPC 2.0 protocol-layer models/codec/tests under STJSON."
 ---
 
 # STJSON Skill
 
 ## Purpose
 
-Provide a repeatable workflow for implementing and validating STJSON, AnyCodable, and JSONLines changes in this repository.
+Provide a repeatable workflow for implementing and validating STJSON, AnyCodable, JSONLines, and JSON-RPC 2.0 protocol-layer changes in this repository.
 
 ## What this skill provides
 
@@ -34,6 +34,7 @@ Provide a repeatable workflow for implementing and validating STJSON, AnyCodable
 6. If asked for usage examples, load only one relevant reference file first:
    - `skills/stjson/references/anycodable.md`
    - `skills/stjson/references/codable-extensions.md`
+   - `skills/stjson/references/jsonrpc2.md`
    - `skills/stjson/references/jsonlines.md`
    - `skills/stjson/references/interop.md`
    - `skills/stjson/references/troubleshooting.md`
@@ -44,6 +45,10 @@ Provide a repeatable workflow for implementing and validating STJSON, AnyCodable
    - `JSONLines.Source.data(data)`
    - `JSONLines.Source.url(fileURL, chunkSize: 64 * 1024)`
 9. Explain API simplification clearly: direct `URL`/`Data` overloads were intentionally removed from sync decode/forEach/compactMap entry points to keep one stable call shape (`from: Source`) and reduce external API surface.
+10. For JSON-RPC 2.0 tasks:
+   - Keep implementation transport-agnostic (protocol layer only; no HTTP/WebSocket coupling unless explicitly requested).
+   - Enforce strict protocol rules in decode/validation tests (`jsonrpc == "2.0"`, `params` object/array only, response `result/error` mutual exclusion, batch empty-array invalid).
+   - Prefer explicit `JSONEncoder`/`JSONDecoder` injection and avoid relying on mutable global `shared` coders for default behavior.
 
 ## Output requirements
 
