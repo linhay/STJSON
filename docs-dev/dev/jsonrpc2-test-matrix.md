@@ -46,6 +46,12 @@
 12. `testDefaultEncoderIsIndependentFromSharedEncoder`
 - 覆盖：默认编码入口与 `JSONEncoder.shared` 隔离
 
+13. `testResponseDecodeAllowsMissingJSONRPCField`
+- 覆盖：响应解码对缺省 `jsonrpc` 的兼容行为
+
+14. `testResponseValidationRejectsInvalidJSONRPCVersion`
+- 覆盖：响应中显式 `jsonrpc` 非 `2.0` 时的协议校验
+
 ## 错误码约定
 - `-32700`: Parse error
 - `-32600`: Invalid Request
@@ -56,4 +62,4 @@
 业务扩展通过 `JSONRPC.ErrorCode.custom(Int)` 表示。
 
 ## 兼容性说明
-- 本次为新增 JSON-RPC 模块，不更改现有 STJSON/AnyCodable 公共 API。
+- 响应解码增加缺省 `jsonrpc` 的兼容处理（缺省时视为 `"2.0"`）；请求解码与显式版本校验规则保持不变。

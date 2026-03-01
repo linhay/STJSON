@@ -225,7 +225,7 @@ public extension JSONRPC {
 
         public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
-            self.jsonrpc = try container.decode(String.self, forKey: .jsonrpc)
+            self.jsonrpc = try container.decodeIfPresent(String.self, forKey: .jsonrpc) ?? "2.0"
             self.id = try container.decodeIfPresent(ID.self, forKey: .id)
             self.result = try container.decodeIfPresent(AnyCodable.self, forKey: .result)
             self.error = try container.decodeIfPresent(ErrorObject.self, forKey: .error)

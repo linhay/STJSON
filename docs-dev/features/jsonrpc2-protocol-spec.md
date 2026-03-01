@@ -42,3 +42,9 @@
 - Given 外部修改 `JSONEncoder.shared` 的输出策略
 - When 调用 JSON-RPC 默认编码入口
 - Then 编码行为不应受 `shared` 影响
+
+## 场景 9：响应缺省 `jsonrpc` 的兼容解码
+- Given 一个仅包含 `id` 与 `result`（或 `error`）的响应对象，未显式提供 `jsonrpc`
+- When 解码为 `JSONRPC.Response`
+- Then 应按 `jsonrpc = "2.0"` 进行兼容解码并通过响应校验
+- And 若显式提供 `jsonrpc` 且不为 `"2.0"`，仍应判定为非法响应

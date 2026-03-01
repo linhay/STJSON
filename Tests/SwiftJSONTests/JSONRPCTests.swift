@@ -134,6 +134,27 @@ final class JSONRPCTests: XCTestCase {
         XCTAssertEqual(decoded.error?.message, "Method not found")
     }
 
+    func testResponseDecodeAllowsMissingJSONRPCField() throws {
+        let payload = #"{"id":1,"result":{"ok":true}}"#
+        let decoded = try JSONDecoder().decode(JSONRPC.Response.self, from: data(payload))
+
+        XCTAssertEqual(decoded.jsonrpc, "2.0")
+        XCTAssertEqual(decoded.id, .int(1))
+        XCTAssertEqual(decoded.result, AnyCodable(["ok": true]))
+        XCTAssertNil(decoded.error)
+    }
+
+    func testResponseValidationRejectsInvalidJSONRPCVersion() {
+        let payload = #"{"jsonrpc":"1.0","id":1,"result":{"ok":true}}"#
+
+        XCTAssertThrowsError(try JSONDecoder().decode(JSONRPC.Response.self, from: data(payload))) { error in
+            guard let rpcError = error as? JSONRPC.ProtocolError else {
+                return XCTFail("expected protocol error")
+            }
+            XCTAssertEqual(rpcError.errorCode, .invalidRequest)
+        }
+    }
+
     func testIDSupportsStringIntNullRoundTrip() throws {
         struct Box: Codable, Equatable {
             let ids: [JSONRPC.ID]
