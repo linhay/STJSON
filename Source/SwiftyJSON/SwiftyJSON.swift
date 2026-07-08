@@ -1424,11 +1424,19 @@ extension JSON {
         return current
     }
 
-    public func string(at path: JSONSubscriptType...) -> String? {
+    // MARK: String
+    public func string(at path: JSONSubscriptType...) -> String? { return string(at: path) }
+    public func string(at path: [JSONSubscriptType]) -> String? {
         return rawObject(at: path) as? String
     }
+    public func stringValue(at path: JSONSubscriptType...) -> String { return stringValue(at: path) }
+    public func stringValue(at path: [JSONSubscriptType]) -> String {
+        return string(at: path) ?? ""
+    }
 
-    public func int(at path: JSONSubscriptType...) -> Int? {
+    // MARK: Int
+    public func int(at path: JSONSubscriptType...) -> Int? { return int(at: path) }
+    public func int(at path: [JSONSubscriptType]) -> Int? {
         if let num = rawObject(at: path) as? NSNumber {
             return num.intValue
         } else if let str = rawObject(at: path) as? String {
@@ -1436,8 +1444,14 @@ extension JSON {
         }
         return nil
     }
+    public func intValue(at path: JSONSubscriptType...) -> Int { return intValue(at: path) }
+    public func intValue(at path: [JSONSubscriptType]) -> Int {
+        return int(at: path) ?? 0
+    }
 
-    public func double(at path: JSONSubscriptType...) -> Double? {
+    // MARK: Double
+    public func double(at path: JSONSubscriptType...) -> Double? { return double(at: path) }
+    public func double(at path: [JSONSubscriptType]) -> Double? {
         if let num = rawObject(at: path) as? NSNumber {
             return num.doubleValue
         } else if let str = rawObject(at: path) as? String {
@@ -1445,13 +1459,212 @@ extension JSON {
         }
         return nil
     }
+    public func doubleValue(at path: JSONSubscriptType...) -> Double { return doubleValue(at: path) }
+    public func doubleValue(at path: [JSONSubscriptType]) -> Double {
+        return double(at: path) ?? 0.0
+    }
 
-    public func bool(at path: JSONSubscriptType...) -> Bool? {
+    // MARK: Bool
+    public func bool(at path: JSONSubscriptType...) -> Bool? { return bool(at: path) }
+    public func bool(at path: [JSONSubscriptType]) -> Bool? {
         if let num = rawObject(at: path) as? NSNumber {
             return num.boolValue
         } else if let str = rawObject(at: path) as? String {
             return Bool(str)
         }
         return nil
+    }
+    public func boolValue(at path: JSONSubscriptType...) -> Bool { return boolValue(at: path) }
+    public func boolValue(at path: [JSONSubscriptType]) -> Bool {
+        return bool(at: path) ?? false
+    }
+
+    // MARK: Float
+    public func float(at path: JSONSubscriptType...) -> Float? { return float(at: path) }
+    public func float(at path: [JSONSubscriptType]) -> Float? {
+        if let num = rawObject(at: path) as? NSNumber {
+            return num.floatValue
+        } else if let str = rawObject(at: path) as? String {
+            return Float(str)
+        }
+        return nil
+    }
+    public func floatValue(at path: JSONSubscriptType...) -> Float { return floatValue(at: path) }
+    public func floatValue(at path: [JSONSubscriptType]) -> Float {
+        return float(at: path) ?? 0.0
+    }
+
+    // MARK: UInt
+    public func uInt(at path: JSONSubscriptType...) -> UInt? { return uInt(at: path) }
+    public func uInt(at path: [JSONSubscriptType]) -> UInt? {
+        if let num = rawObject(at: path) as? NSNumber {
+            return num.uintValue
+        } else if let str = rawObject(at: path) as? String {
+            return UInt(str)
+        }
+        return nil
+    }
+    public func uIntValue(at path: JSONSubscriptType...) -> UInt { return uIntValue(at: path) }
+    public func uIntValue(at path: [JSONSubscriptType]) -> UInt {
+        return uInt(at: path) ?? 0
+    }
+
+    // MARK: Int8
+    public func int8(at path: JSONSubscriptType...) -> Int8? { return int8(at: path) }
+    public func int8(at path: [JSONSubscriptType]) -> Int8? {
+        if let num = rawObject(at: path) as? NSNumber {
+            return num.int8Value
+        } else if let str = rawObject(at: path) as? String {
+            return Int8(str)
+        }
+        return nil
+    }
+    public func int8Value(at path: JSONSubscriptType...) -> Int8 { return int8Value(at: path) }
+    public func int8Value(at path: [JSONSubscriptType]) -> Int8 {
+        return int8(at: path) ?? 0
+    }
+
+    // MARK: UInt8
+    public func uInt8(at path: JSONSubscriptType...) -> UInt8? { return uInt8(at: path) }
+    public func uInt8(at path: [JSONSubscriptType]) -> UInt8? {
+        if let num = rawObject(at: path) as? NSNumber {
+            return num.uint8Value
+        } else if let str = rawObject(at: path) as? String {
+            return UInt8(str)
+        }
+        return nil
+    }
+    public func uInt8Value(at path: JSONSubscriptType...) -> UInt8 { return uInt8Value(at: path) }
+    public func uInt8Value(at path: [JSONSubscriptType]) -> UInt8 {
+        return uInt8(at: path) ?? 0
+    }
+
+    // MARK: Int16
+    public func int16(at path: JSONSubscriptType...) -> Int16? { return int16(at: path) }
+    public func int16(at path: [JSONSubscriptType]) -> Int16? {
+        if let num = rawObject(at: path) as? NSNumber {
+            return num.int16Value
+        } else if let str = rawObject(at: path) as? String {
+            return Int16(str)
+        }
+        return nil
+    }
+    public func int16Value(at path: JSONSubscriptType...) -> Int16 { return int16Value(at: path) }
+    public func int16Value(at path: [JSONSubscriptType]) -> Int16 {
+        return int16(at: path) ?? 0
+    }
+
+    // MARK: UInt16
+    public func uInt16(at path: JSONSubscriptType...) -> UInt16? { return uInt16(at: path) }
+    public func uInt16(at path: [JSONSubscriptType]) -> UInt16? {
+        if let num = rawObject(at: path) as? NSNumber {
+            return num.uint16Value
+        } else if let str = rawObject(at: path) as? String {
+            return UInt16(str)
+        }
+        return nil
+    }
+    public func uInt16Value(at path: JSONSubscriptType...) -> UInt16 { return uInt16Value(at: path) }
+    public func uInt16Value(at path: [JSONSubscriptType]) -> UInt16 {
+        return uInt16(at: path) ?? 0
+    }
+
+    // MARK: Int32
+    public func int32(at path: JSONSubscriptType...) -> Int32? { return int32(at: path) }
+    public func int32(at path: [JSONSubscriptType]) -> Int32? {
+        if let num = rawObject(at: path) as? NSNumber {
+            return num.int32Value
+        } else if let str = rawObject(at: path) as? String {
+            return Int32(str)
+        }
+        return nil
+    }
+    public func int32Value(at path: JSONSubscriptType...) -> Int32 { return int32Value(at: path) }
+    public func int32Value(at path: [JSONSubscriptType]) -> Int32 {
+        return int32(at: path) ?? 0
+    }
+
+    // MARK: UInt32
+    public func uInt32(at path: JSONSubscriptType...) -> UInt32? { return uInt32(at: path) }
+    public func uInt32(at path: [JSONSubscriptType]) -> UInt32? {
+        if let num = rawObject(at: path) as? NSNumber {
+            return num.uint32Value
+        } else if let str = rawObject(at: path) as? String {
+            return UInt32(str)
+        }
+        return nil
+    }
+    public func uInt32Value(at path: JSONSubscriptType...) -> UInt32 { return uInt32Value(at: path) }
+    public func uInt32Value(at path: [JSONSubscriptType]) -> UInt32 {
+        return uInt32(at: path) ?? 0
+    }
+
+    // MARK: Int64
+    public func int64(at path: JSONSubscriptType...) -> Int64? { return int64(at: path) }
+    public func int64(at path: [JSONSubscriptType]) -> Int64? {
+        if let num = rawObject(at: path) as? NSNumber {
+            return num.int64Value
+        } else if let str = rawObject(at: path) as? String {
+            return Int64(str)
+        }
+        return nil
+    }
+    public func int64Value(at path: JSONSubscriptType...) -> Int64 { return int64Value(at: path) }
+    public func int64Value(at path: [JSONSubscriptType]) -> Int64 {
+        return int64(at: path) ?? 0
+    }
+
+    // MARK: UInt64
+    public func uInt64(at path: JSONSubscriptType...) -> UInt64? { return uInt64(at: path) }
+    public func uInt64(at path: [JSONSubscriptType]) -> UInt64? {
+        if let num = rawObject(at: path) as? NSNumber {
+            return num.uint64Value
+        } else if let str = rawObject(at: path) as? String {
+            return UInt64(str)
+        }
+        return nil
+    }
+    public func uInt64Value(at path: JSONSubscriptType...) -> UInt64 { return uInt64Value(at: path) }
+    public func uInt64Value(at path: [JSONSubscriptType]) -> UInt64 {
+        return uInt64(at: path) ?? 0
+    }
+
+    // MARK: URL
+    public func url(at path: JSONSubscriptType...) -> URL? { return url(at: path) }
+    public func url(at path: [JSONSubscriptType]) -> URL? {
+        if let str = string(at: path) {
+            return URL(string: str)
+        }
+        return nil
+    }
+    public func urlValue(at path: JSONSubscriptType...) -> URL { return urlValue(at: path) }
+    public func urlValue(at path: [JSONSubscriptType]) -> URL {
+        return url(at: path) ?? URL(string: "http://")!
+    }
+
+    // MARK: Array
+    public func array(at path: JSONSubscriptType...) -> [JSON]? { return array(at: path) }
+    public func array(at path: [JSONSubscriptType]) -> [JSON]? {
+        if let arr = rawObject(at: path) as? [Any] {
+            return arr.map { JSON($0) }
+        }
+        return nil
+    }
+    public func arrayValue(at path: JSONSubscriptType...) -> [JSON] { return arrayValue(at: path) }
+    public func arrayValue(at path: [JSONSubscriptType]) -> [JSON] {
+        return array(at: path) ?? []
+    }
+
+    // MARK: Dictionary
+    public func dictionary(at path: JSONSubscriptType...) -> [String: JSON]? { return dictionary(at: path) }
+    public func dictionary(at path: [JSONSubscriptType]) -> [String: JSON]? {
+        if let dict = rawObject(at: path) as? [String: Any] {
+            return dict.mapValues { JSON($0) }
+        }
+        return nil
+    }
+    public func dictionaryValue(at path: JSONSubscriptType...) -> [String: JSON] { return dictionaryValue(at: path) }
+    public func dictionaryValue(at path: [JSONSubscriptType]) -> [String: JSON] {
+        return dictionary(at: path) ?? [:]
     }
 }
