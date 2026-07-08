@@ -188,7 +188,18 @@ func run() {
             let _ = (id, text, screenName, verified)
         }
     }
-    printTableRow(name: "STJSON", iterations: iterations * 10, timeSec: timeSTJSONRetrieve, sizeBytes: twitterData.count, baselineTimeSec: baselineTime)
+    printTableRow(name: "STJSON (Subscript)", iterations: iterations * 10, timeSec: timeSTJSONRetrieve, sizeBytes: twitterData.count, baselineTimeSec: baselineTime)
+
+    let timeSTJSONFastRetrieve = measure(iterations: iterations * 10) {
+        for k in [100, 500, 1000, 1500] {
+            let id = stjsonObj.int(at: "statuses", k, "id") ?? 0
+            let text = stjsonObj.string(at: "statuses", k, "text") ?? ""
+            let screenName = stjsonObj.string(at: "statuses", k, "user", "screen_name") ?? ""
+            let verified = stjsonObj.bool(at: "statuses", k, "user", "verified") ?? false
+            let _ = (id, text, screenName, verified)
+        }
+    }
+    printTableRow(name: "STJSON (Fast Path)", iterations: iterations * 10, timeSec: timeSTJSONFastRetrieve, sizeBytes: twitterData.count, baselineTimeSec: baselineTime)
     
     let timeSwiftyJSONRetrieve = measure(iterations: iterations * 10) {
         let statuses = swiftyjsonObj["statuses"]

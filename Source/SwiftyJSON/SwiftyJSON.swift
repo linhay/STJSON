@@ -1385,3 +1385,73 @@ extension JSON: Codable {
         }
     }
 }
+
+// MARK: - Fast Path Retrieval Extension
+extension JSON {
+    /// Fast-path retrieval of the raw object at the specified path without allocating temporary JSON objects.
+    public func rawObject(at path: JSONSubscriptType...) -> Any? {
+        return self.rawObject(at: path)
+    }
+
+    public func rawObject(at path: [JSONSubscriptType]) -> Any? {
+        var current: Any = self.object
+        for step in path {
+            switch step.jsonKey {
+            case .index(let idx):
+                let rawArr: [Any]
+                if let arr = current as? [Any] {
+                    rawArr = arr
+                } else if let json = current as? JSON, json.type == .array {
+                    rawArr = json.rawArray
+                } else {
+                    return nil
+                }
+                guard idx >= 0, idx < rawArr.count else { return nil }
+                current = rawArr[idx]
+            case .key(let key):
+                let rawDict: [String: Any]
+                if let dict = current as? [String: Any] {
+                    rawDict = dict
+                } else if let json = current as? JSON, json.type == .dictionary {
+                    rawDict = json.rawDictionary
+                } else {
+                    return nil
+                }
+                guard let val = rawDict[key] else { return nil }
+                current = val
+            }
+        }
+        return current
+    }
+
+    public func string(at path: JSONSubscriptType...) -> String? {
+        return rawObject(at: path) as? String
+    }
+
+    public func int(at path: JSONSubscriptType...) -> Int? {
+        if let num = rawObject(at: path) as? NSNumber {
+            return num.intValue
+        } else if let str = rawObject(at: path) as? String {
+            return Int(str)
+        }
+        return nil
+    }
+
+    public func double(at path: JSONSubscriptType...) -> Double? {
+        if let num = rawObject(at: path) as? NSNumber {
+            return num.doubleValue
+        } else if let str = rawObject(at: path) as? String {
+            return Double(str)
+        }
+        return nil
+    }
+
+    public func bool(at path: JSONSubscriptType...) -> Bool? {
+        if let num = rawObject(at: path) as? NSNumber {
+            return num.boolValue
+        } else if let str = rawObject(at: path) as? String {
+            return Bool(str)
+        }
+        return nil
+    }
+}
