@@ -11,6 +11,11 @@ let package = Package(
         .target(name: "STJSON", dependencies: ["AnyCodable", "SwiftyJSON"]),
         .target(name: "AnyCodable", dependencies: []),
         .target(name: "SwiftyJSON", dependencies: []),
+        .executableTarget(
+            name: "STJSONBenchmark",
+            dependencies: ["STJSON", "SwiftyJSON", "AnyCodable"],
+            path: "Source/STJSONBenchmark"
+        ),
         .testTarget(
             name: "SwiftJSONTests",
             dependencies: ["SwiftyJSON", "STJSON"],
