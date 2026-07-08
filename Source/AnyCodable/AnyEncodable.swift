@@ -1,6 +1,9 @@
 #if canImport(Foundation)
 import Foundation
 #endif
+#if canImport(CoreFoundation)
+import CoreFoundation
+#endif
 
 /**
  A type-erased `Encodable` value.
@@ -58,21 +61,21 @@ extension _AnyEncodable {
         #endif
         case is Void:
             try container.encodeNil()
-        case let int as Int:
+        case let int as Int where type(of: value) == Int.self:
             try container.encode(int)
-        case let int8 as Int8:
+        case let int8 as Int8 where type(of: value) == Int8.self:
             try container.encode(int8)
-        case let int16 as Int16:
+        case let int16 as Int16 where type(of: value) == Int16.self:
             try container.encode(int16)
-        case let int32 as Int32:
+        case let int32 as Int32 where type(of: value) == Int32.self:
             try container.encode(int32)
-        case let int64 as Int64:
+        case let int64 as Int64 where type(of: value) == Int64.self:
             try container.encode(int64)
-        case let float as Float:
+        case let float as Float where type(of: value) == Float.self:
             try container.encode(float)
-        case let double as Double:
+        case let double as Double where type(of: value) == Double.self:
             try container.encode(double)
-        case let bool as Bool:
+        case let bool as Bool where type(of: value) == Bool.self:
             try container.encode(bool)
         case let string as String:
             try container.encode(string)
@@ -98,6 +101,12 @@ extension _AnyEncodable {
 
     #if canImport(Foundation)
     private func encode(nsnumber: NSNumber, into container: inout SingleValueEncodingContainer) throws {
+        let typeID = CFGetTypeID(nsnumber)
+        if typeID == CFBooleanGetTypeID() {
+            try container.encode(nsnumber.boolValue)
+            return
+        }
+
         switch Character(Unicode.Scalar(UInt8(nsnumber.objCType.pointee)))  {
         case "B":
             try container.encode(nsnumber.boolValue)

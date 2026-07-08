@@ -828,7 +828,7 @@ extension JSON {
                 return decimal == .notANumber ? .zero : decimal
             case .number: return object as? NSNumber ?? NSNumber(value: 0)
             case .bool: return NSNumber(value: rawBool ? 1 : 0)
-            default: return NSNumber(value: 0.0)
+            default: return NSNumber(value: 0)
             }
         }
         set {

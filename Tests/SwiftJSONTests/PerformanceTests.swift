@@ -135,3 +135,9 @@ class PerformanceTests: XCTestCase {
         }
     }
 }
+
+#if !canImport(ObjectiveC)
+func autoreleasepool<Result>(_ block: () throws -> Result) rethrows -> Result {
+    try block()
+}
+#endif
