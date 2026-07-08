@@ -8,19 +8,14 @@ on:
 
 jobs:
   build:
-    name: Swift ${{ matrix.swift }} on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [macos-latest]
-        swift: ["6.0"]
+    name: Swift on macos-15
+    runs-on: macos-15
     steps:
     - uses: actions/checkout@v4
-    - uses: swift-actions/setup-swift@v2
-      with:
-        swift-version: ${{ matrix.swift }}
     - name: Get swift version
-      run: swift --version
+      run: |
+        xcodebuild -version
+        swift --version
 
     - name: Build
       run: swift build
