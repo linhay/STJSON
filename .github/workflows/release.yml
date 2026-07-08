@@ -1,8 +1,12 @@
 name: Release
 
 on:
-  push:
-    branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Optional release version, for example 1.2.3. Leave empty to auto-increment the latest semver tag.
+        required: false
+        type: string
 
 concurrency:
   group: release
@@ -10,7 +14,7 @@ concurrency:
 
 jobs:
   release:
-    name: Release (on push to master)
+    name: Release
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -26,7 +30,14 @@ jobs:
         run: |
           set -euo pipefail
           latest_tag="$(git tag --list --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)"
-          if [[ -z "${latest_tag}" ]]; then
+          requested="${{ github.event.inputs.version }}"
+          if [[ -n "${requested}" ]]; then
+            if [[ ! "${requested}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "version must match x.y.z, got: ${requested}" >&2
+              exit 1
+            fi
+            next_tag="${requested}"
+          elif [[ -z "${latest_tag}" ]]; then
             next_tag="1.0.0"
           else
             IFS='.' read -r major minor patch <<< "${latest_tag}"

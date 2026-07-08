@@ -2,9 +2,9 @@ name: Swift
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master, main ]
   pull_request:
-    branches: [ main ]
+    branches: [ master, main ]
 
 jobs:
   build:
@@ -27,3 +27,72 @@ jobs:
 
     - name: Run Tests
       run: swift test --enable-code-coverage
+
+    - name: Run Examples
+      run: swift run --package-path Examples
+
+    - name: Validate public skills bundle
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 - <<'PY'
+        from pathlib import Path
+        import tarfile
+        import tempfile
+
+        skill_root = Path("skills")
+        allowed_entries = {"README.md", "stjson-usage", "stjson-dev-feedback", "stjson-update"}
+        actual_entries = {
+            path.name for path in skill_root.iterdir()
+            if path.name not in {".DS_Store", "dist"}
+        }
+        unexpected = sorted(actual_entries - allowed_entries)
+        missing = sorted(allowed_entries - actual_entries)
+        if unexpected or missing:
+            raise SystemExit(f"unexpected={unexpected} missing={missing}")
+
+        for skill_name in ("stjson-usage", "stjson-dev-feedback", "stjson-update"):
+            skill_md = skill_root / skill_name / "SKILL.md"
+            if not skill_md.exists():
+                raise SystemExit(f"missing {skill_md}")
+            lines = skill_md.read_text(encoding="utf-8").lstrip("\ufeff").splitlines()
+            if not lines or lines[0].strip() != "---":
+                raise SystemExit(f"missing frontmatter opening in {skill_md}")
+            try:
+                end_index = lines.index("---", 1)
+            except ValueError:
+                raise SystemExit(f"missing frontmatter closing in {skill_md}")
+            frontmatter = lines[1:end_index]
+            fields = {}
+            for line in frontmatter:
+                if ":" in line:
+                    key, value = line.split(":", 1)
+                    fields[key.strip()] = value.strip().strip('"').strip("'")
+            if not fields.get("name") or not fields.get("description"):
+                raise SystemExit(f"{skill_md} must include name and description")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            bundle = Path(tmp) / "stjson-skills.tar.gz"
+            with tarfile.open(bundle, "w:gz") as tarf:
+                for file_path in skill_root.rglob("*"):
+                    if file_path.is_file():
+                        if file_path.name == ".DS_Store":
+                            continue
+                        if "dist" in file_path.parts:
+                            continue
+                        arcname = Path("STJSON.skills") / file_path.relative_to(skill_root)
+                        tarf.add(file_path, arcname=str(arcname))
+            with tarfile.open(bundle, "r:gz") as tarf:
+                names = set(tarf.getnames())
+            required = {
+                "STJSON.skills/README.md",
+                "STJSON.skills/stjson-usage/SKILL.md",
+                "STJSON.skills/stjson-update/SKILL.md",
+                "STJSON.skills/stjson-dev-feedback/SKILL.md",
+            }
+            missing_bundle_entries = sorted(required - names)
+            if missing_bundle_entries:
+                raise SystemExit(f"missing bundle entries: {missing_bundle_entries}")
+
+        print("public skills bundle ok")
+        PY
