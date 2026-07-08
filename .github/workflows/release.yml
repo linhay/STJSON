@@ -41,57 +41,67 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          import zipfile
+          import tarfile
           import sys
 
-          skill_path = Path("skills/stjson").resolve()
+          skill_root = Path("skills").resolve()
           out_dir = Path("skills/dist").resolve()
-          skill_md = skill_path / "SKILL.md"
-
-          if not skill_md.exists():
-              print(f"[ERROR] SKILL.md not found at {skill_md}")
+          allowed_entries = {"README.md", "stjson-usage", "stjson-dev-feedback", "stjson-update"}
+          actual_entries = {
+              path.name for path in skill_root.iterdir()
+              if path.name not in {".DS_Store", "dist"}
+          }
+          unexpected = sorted(actual_entries - allowed_entries)
+          missing = sorted(allowed_entries - actual_entries)
+          if unexpected or missing:
+              if unexpected:
+                  print(f"[ERROR] Unexpected public skill entries: {unexpected}")
+              if missing:
+                  print(f"[ERROR] Missing public skill entries: {missing}")
               sys.exit(1)
 
-          lines = skill_md.read_text(encoding="utf-8").lstrip("\ufeff").splitlines()
-          if not lines or lines[0].strip() != "---":
-              print("[ERROR] Missing YAML frontmatter in SKILL.md (no opening ---)")
-              sys.exit(1)
-          try:
-              end_index = lines.index("---", 1)
-          except ValueError:
-              print("[ERROR] Missing YAML frontmatter in SKILL.md (no closing ---)")
-              sys.exit(1)
-
-          frontmatter = lines[1:end_index]
-          def get_field(name: str):
-              prefix = f"{name}:"
+          for skill_name in ("stjson-usage", "stjson-dev-feedback", "stjson-update"):
+              skill_md = skill_root / skill_name / "SKILL.md"
+              if not skill_md.exists():
+                  print(f"[ERROR] SKILL.md not found at {skill_md}")
+                  sys.exit(1)
+              lines = skill_md.read_text(encoding="utf-8").lstrip("\ufeff").splitlines()
+              if not lines or lines[0].strip() != "---":
+                  print(f"[ERROR] Missing YAML frontmatter in {skill_md}")
+                  sys.exit(1)
+              try:
+                  end_index = lines.index("---", 1)
+              except ValueError:
+                  print(f"[ERROR] Missing YAML frontmatter closing marker in {skill_md}")
+                  sys.exit(1)
+              frontmatter = lines[1:end_index]
+              fields = {}
               for line in frontmatter:
-                  if line.strip().startswith(prefix):
-                      return line.split(":", 1)[1].strip().strip('"').strip("'")
-              return None
-
-          name = get_field("name")
-          description = get_field("description")
-          if not name or not description:
-              print("[ERROR] SKILL.md frontmatter must include name and description")
-              sys.exit(1)
+                  if ":" in line:
+                      key, value = line.split(":", 1)
+                      fields[key.strip()] = value.strip().strip('"').strip("'")
+              if not fields.get("name") or not fields.get("description"):
+                  print(f"[ERROR] {skill_md} frontmatter must include name and description")
+                  sys.exit(1)
 
           out_dir.mkdir(parents=True, exist_ok=True)
-          skill_filename = out_dir / f"{skill_path.name}.skill"
+          bundle_filename = out_dir / "stjson-skills.tar.gz"
           skip_names = {".DS_Store"}
 
-          with zipfile.ZipFile(skill_filename, "w", zipfile.ZIP_DEFLATED) as zipf:
-              for file_path in skill_path.rglob("*"):
+          with tarfile.open(bundle_filename, "w:gz") as tarf:
+              for file_path in skill_root.rglob("*"):
                   if file_path.is_file():
                       if file_path.name in skip_names:
                           continue
+                      if "dist" in file_path.parts:
+                          continue
                       if any(part in ("__MACOSX",) for part in file_path.parts):
                           continue
-                      arcname = file_path.relative_to(skill_path.parent)
-                      zipf.write(file_path, arcname)
+                      arcname = Path("STJSON.skills") / file_path.relative_to(skill_root)
+                      tarf.add(file_path, arcname=str(arcname))
                       print(f"  Added: {arcname}")
 
-          print(f"\n[OK] Successfully packaged skill to: {skill_filename}")
+          print(f"\n[OK] Successfully packaged skills bundle to: {bundle_filename}")
           PY
 
       - name: Create GitHub Release
@@ -101,4 +111,4 @@ jobs:
           name: Release ${{ steps.version.outputs.next_tag }}
           generate_release_notes: true
           files: |
-            skills/dist/stjson.skill
+            skills/dist/stjson-skills.tar.gz

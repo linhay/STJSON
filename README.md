@@ -1,560 +1,264 @@
-# SwiftyJSON
+# STJSON
 
-[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage) ![CocoaPods](https://img.shields.io/cocoapods/v/SwiftyJSON.svg) ![Platform](https://img.shields.io/badge/platforms-iOS%208.0%20%7C%20macOS%2010.10%20%7C%20tvOS%209.0%20%7C%20watchOS%203.0-F28D00.svg) [![Reviewed by Hound](https://img.shields.io/badge/Reviewed_by-Hound-8E64B0.svg)](https://houndci.com)
+STJSON is a Swift package that combines:
 
-SwiftyJSON makes it easy to deal with JSON data in Swift.
+- `SwiftyJSON`-style JSON access
+- `Codable` helpers for model <-> JSON conversion
+- `AnyCodable` for heterogeneous JSON payloads
+- `JSONLines` / NDJSON reading and streaming
+- JSON-RPC 2.0 protocol-layer models and codec
 
-Platform | Build Status
----------| --------------| 
-*OS      | [![Travis CI](https://travis-ci.org/SwiftyJSON/SwiftyJSON.svg?branch=master)](https://travis-ci.org/SwiftyJSON/SwiftyJSON)    | 
-[Linux](https://github.com/IBM-Swift/SwiftyJSON)      | [![Build Status](https://travis-ci.org/IBM-Swift/SwiftyJSON.svg?branch=master)](https://travis-ci.org/IBM-Swift/SwiftyJSON)     | 
-
-
-1. [Why is the typical JSON handling in Swift NOT good](#why-is-the-typical-json-handling-in-swift-not-good)
-2. [Requirements](#requirements)
-3. [Integration](#integration)
-4. [Usage](#usage)
-   - [Initialization](#initialization)
-   - [Subscript](#subscript)
-   - [Loop](#loop)
-   - [Error](#error)
-   - [Optional getter](#optional-getter)
-   - [Non-optional getter](#non-optional-getter)
-   - [Setter](#setter)
-   - [Raw object](#raw-object)
-   - [Literal convertibles](#literal-convertibles)
-   - [Merging](#merging)
-5. [Work with Alamofire](#work-with-alamofire)
-6. [Work with Moya](#work-with-moya)
-7. [SwiftyJSON Model Generator](#swiftyjson-model-generator)
-
-
-## Why is the typical JSON handling in Swift NOT good?
-
-Swift is very strict about types. But although explicit typing is good for saving us from mistakes, it becomes painful when dealing with JSON and other areas that are, by nature, implicit about types.
-
-Take the Twitter API for example. Say we want to retrieve a user's "name" value of some tweet in Swift (according to [Twitter's API](https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-home_timeline)).
-
-The code would look like this:
+The package exports `AnyCodable` and `SwiftyJSON` through `STJSON`, so most consumers only need:
 
 ```swift
-if let statusesArray = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [[String: Any]],
-    let user = statusesArray[0]["user"] as? [String: Any],
-    let username = user["name"] as? String {
-    // Finally we got the username
-}
-```
-
-It's not good.
-
-Even if we use optional chaining, it would be messy:
-
-```swift
-if let JSONObject = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [[String: Any]],
-    let username = (JSONObject[0]["user"] as? [String: Any])?["name"] as? String {
-        // There's our username
-}
-```
-
-An unreadable mess--for something that should really be simple!
-
-With SwiftyJSON all you have to do is:
-
-```swift
-let json = JSON(data: dataFromNetworking)
-if let userName = json[0]["user"]["name"].string {
-  //Now you got your value
-}
-```
-
-And don't worry about the Optional Wrapping thing. It's done for you automatically.
-
-```swift
-let json = JSON(data: dataFromNetworking)
-let result = json[999999]["wrong_key"]["wrong_name"]
-if let userName = result.string {
-    //Calm down, take it easy, the ".string" property still produces the correct Optional String type with safety
-} else {
-    //Print the error
-    print(result.error)
-}
+import STJSON
 ```
 
 ## Requirements
 
-- iOS 8.0+ | macOS 10.10+ | tvOS 9.0+ | watchOS 2.0+
-- Xcode 8
+- Swift 5
+- iOS 14+
+- macOS 12+
+- Mac Catalyst 13+
+- tvOS 12+
+- watchOS 6+
 
-## Integration
+See [Package.swift](Package.swift) for the source of truth.
 
-#### CocoaPods (iOS 8+, OS X 10.9+)
+## Installation
 
-You can use [CocoaPods](http://cocoapods.org/) to install `SwiftyJSON` by adding it to your `Podfile`:
-
-```ruby
-platform :ios, '8.0'
-use_frameworks!
-
-target 'MyApp' do
-    pod 'SwiftyJSON', '~> 4.0'
-end
-```
-
-#### Carthage (iOS 8+, OS X 10.9+)
-
-You can use [Carthage](https://github.com/Carthage/Carthage) to install `SwiftyJSON` by adding it to your `Cartfile`:
-
-```
-github "SwiftyJSON/SwiftyJSON" ~> 4.0
-```
-
-If you use Carthage to build your dependencies, make sure you have added `SwiftyJSON.framework` to the "Linked Frameworks and Libraries" section of your target, and have included them in your Carthage framework copying build phase.
-
-#### Swift Package Manager
-
-You can use [The Swift Package Manager](https://swift.org/package-manager) to install `SwiftyJSON` by adding the proper description to your `Package.swift` file:
+### Swift Package Manager
 
 ```swift
-// swift-tools-version:4.0
+// swift-tools-version:5.6
 import PackageDescription
 
 let package = Package(
-    name: "YOUR_PROJECT_NAME",
+    name: "YourProject",
     dependencies: [
-        .package(url: "https://github.com/SwiftyJSON/SwiftyJSON.git", from: "4.0.0"),
+        .package(url: "https://github.com/linhay/STJSON.git", from: "<version>")
+    ],
+    targets: [
+        .target(
+            name: "YourTarget",
+            dependencies: ["STJSON"]
+        )
     ]
 )
 ```
-Then run `swift build` whenever you get prepared.
 
-#### Manually (iOS 7+, OS X 10.9+)
+If you are integrating through Xcode:
 
-To use this library in your project manually you may:  
+1. Add `https://github.com/linhay/STJSON.git` as a package dependency.
+2. Link the `STJSON` product to your target.
+3. Import `STJSON` in code.
 
-1. for Projects, just drag SwiftyJSON.swift to the project tree
-2. for Workspaces, include the whole SwiftyJSON.xcodeproj
+### Manual Source Integration
 
-## Usage
+If you are not using Swift Package Manager, add the relevant sources from:
 
-#### Initialization
+- `Source/STJSON/`
+- `Source/AnyCodable/`
+- `Source/SwiftyJSON/`
 
-```swift
-import SwiftyJSON
+Swift Package Manager is the primary supported integration path.
+
+For copyable examples, see [Examples/](Examples/README.md).
+
+Run the example package from the repository root:
+
+```sh
+swift run --package-path Examples
 ```
 
-```swift
-let json = JSON(data: dataFromNetworking)
-```
-Or
+## Overview
+
+Use STJSON when you want one package that covers both dynamic JSON access and typed model workflows.
+
+### Choose the right layer
+
+- Stable schema: use strong `Codable` models
+- Dynamic / heterogeneous values: use `AnyCodable`
+- Existing `SwiftyJSON` project: keep `JSON` access and bridge into `Codable`
+- NDJSON / `.jsonl`: use `JSONLines`
+- JSON-RPC 2.0 protocol messages: use `JSONRPC`
+
+## Basic Usage
+
+### SwiftyJSON-style access
 
 ```swift
-let json = JSON(jsonObject)
+import STJSON
+
+let raw = #"{"name":"Lin","age":18}"#
+let json = try JSON(data: Data(raw.utf8))
+
+print(json["name"].stringValue)
+print(json["age"].intValue)
 ```
-Or
+
+### Encode and decode a Codable model
 
 ```swift
-if let dataFromString = jsonString.data(using: .utf8, allowLossyConversion: false) {
-    let json = JSON(data: dataFromString)
+import STJSON
+import Foundation
+
+struct User: Codable {
+    let id: Int
+    let name: String
+}
+
+let user = User(id: 1, name: "Lin")
+let json = try user.toJSON
+let decoded: User = try json.decode(User.self)
+```
+
+### Decode from a JSON string with custom decoder settings
+
+```swift
+import STJSON
+import Foundation
+
+struct Event: Codable {
+    let createdAt: Date
+}
+
+let raw = #"{"created_at":"2026-02-11T12:34:56Z"}"#
+let decoder = JSONDecoder.new { decoder in
+    decoder.keyDecodingStrategy = .convertFromSnakeCase
+    decoder.dateDecodingStrategy = .iso8601
+}
+
+let event = try JSONDecoder.decode(Event.self, from: raw, decoder: decoder)
+```
+
+### Dynamic values with AnyCodable
+
+```swift
+import STJSON
+import Foundation
+
+let raw = #"{"id":1,"name":"Alice","meta":{"score":100}}"#
+let data = Data(raw.utf8)
+let payload = try JSONDecoder().decode([String: AnyCodable].self, from: data)
+
+if let id = payload["id"]?.value as? Int {
+    print(id)
 }
 ```
 
-#### Subscript
+### JSONLines / NDJSON
 
 ```swift
-// Getting a double from a JSON Array
-let name = json[0].double
-```
+import STJSON
+import Foundation
 
-```swift
-// Getting an array of string from a JSON Array
-let arrayNames =  json["users"].arrayValue.map {$0["name"].stringValue}
-```
+let ndjson = #"{"id":1}"# + "\n" + #"{"id":2}"#
 
-```swift
-// Getting a string from a JSON Dictionary
-let name = json["name"].stringValue
-```
-
-```swift
-// Getting a string using a path to the element
-let path: [JSONSubscriptType] = [1,"list",2,"name"]
-let name = json[path].string
-// Just the same
-let name = json[1]["list"][2]["name"].string
-// Alternatively
-let name = json[1,"list",2,"name"].string
-```
-
-```swift
-// With a hard way
-let name = json[].string
-```
-
-```swift
-// With a custom way
-let keys:[JSONSubscriptType] = [1,"list",2,"name"]
-let name = json[keys].string
-```
-
-#### Loop
-
-```swift
-// If json is .Dictionary
-for (key,subJson):(String, JSON) in json {
-   // Do something you want
+var ids: [Int] = []
+try JSONLines().forEachLine(from: .string(ndjson)) { json in
+    ids.append(json["id"].intValue)
 }
 ```
 
-*The first element is always a String, even if the JSON is an Array*
+For file and streaming inputs, use:
 
 ```swift
-// If json is .Array
-// The `index` is 0..<json.count's string value
-for (index,subJson):(String, JSON) in json {
-    // Do something you want
+JSONLines.Source.string(ndjson)
+JSONLines.Source.data(data)
+JSONLines.Source.url(fileURL, chunkSize: 64 * 1024)
+```
+
+### JSON-RPC 2.0 protocol layer
+
+```swift
+import STJSON
+
+let raw = #"{"jsonrpc":"2.0","method":"sum","params":[1,2],"id":1}"#
+let inbound = try JSONRPC.decodeInbound(from: Data(raw.utf8))
+```
+
+STJSON handles protocol-layer request/response/batch models. Transport details such as HTTP or WebSocket remain outside this package.
+
+### Bridge from SwiftyJSON into Codable
+
+```swift
+import STJSON
+
+struct User: Codable {
+    let id: Int
+    let name: String
+}
+
+let json = try JSON(data: Data(#"{"id":1,"name":"Jane"}"#.utf8))
+let user: User = try json.decode(to: User.self)
+```
+
+## Common Patterns
+
+### Model -> dictionary
+
+```swift
+import STJSON
+
+struct User: Codable {
+    let id: Int
+    let name: String
+}
+
+let user = User(id: 1, name: "Lin")
+let json = try user.toJSON
+let dict = json.dictionaryObject ?? [:]
+```
+
+### Dynamic dictionary / array inside Codable
+
+```swift
+import STJSON
+
+struct Payload: Codable {
+    let metadata: [String: Any]
+    let items: [Any]
 }
 ```
 
-#### Error
-
-##### SwiftyJSON 4.x
-
-SwiftyJSON 4.x introduces an enum type called `SwiftyJSONError`, which includes `unsupportedType`, `indexOutOfBounds`, `elementTooDeep`, `wrongType`, `notExist` and `invalidJSON`, at the same time, `ErrorDomain` are being replaced by `SwiftyJSONError.errorDomain`.
-Note: Those old error types are deprecated in SwiftyJSON 4.x and will be removed in the future release.
-
-##### SwiftyJSON 3.x
-
-Use a subscript to get/set a value in an Array or Dictionary
-
-If the JSON is:
-*  an array, the app may crash with "index out-of-bounds."
-*  a dictionary, it will be assigned to `nil` without a reason.
-*  not an array or a dictionary, the app may crash with an "unrecognised selector" exception.
-
-This will never happen in SwiftyJSON.
+### Async JSONLines from file
 
 ```swift
-let json = JSON(["name", "age"])
-if let name = json[999].string {
-    // Do something you want
-} else {
-    print(json[999].error!) // "Array[999] is out of bounds"
+import STJSON
+import Foundation
+
+for try await line in JSONLines().asyncLines(url: fileURL) {
+    let json = try JSON(data: line)
+    print(json)
 }
 ```
 
-```swift
-let json = JSON(["name":"Jack", "age": 25])
-if let name = json["address"].string {
-    // Do something you want
-} else {
-    print(json["address"].error!) // "Dictionary["address"] does not exist"
-}
-```
+## Troubleshooting
 
-```swift
-let json = JSON(12345)
-if let age = json[0].string {
-    // Do something you want
-} else {
-    print(json[0])       // "Array[0] failure, It is not an array"
-    print(json[0].error!) // "Array[0] failure, It is not an array"
-}
+- `No such module 'STJSON'`:
+  verify that the `STJSON` product is linked to the current target, not just added to the workspace.
+- JSONLines `URL` / `Data` mismatch:
+  use `JSONLines.Source.url(...)` or `JSONLines.Source.data(...)`.
+- Dynamic JSON encoding fails:
+  ensure values are JSON-compatible types such as `String`, `Int`, `Bool`, `[Any]`, `[String: Any]`, or `NSNull`.
+- Unsure whether to use `Codable` or `AnyCodable`:
+  use strong `Codable` models for stable schema, `AnyCodable` for truly dynamic payloads.
 
-if let name = json["name"].string {
-    // Do something you want
-} else {
-    print(json["name"])       // "Dictionary[\"name"] failure, It is not an dictionary"
-    print(json["name"].error!) // "Dictionary[\"name"] failure, It is not an dictionary"
-}
-```
+## Public Skills
 
-#### Optional getter
+This repository also maintains public usage skills under [skills/](skills/):
 
-```swift
-// NSNumber
-if let id = json["user"]["favourites_count"].number {
-   // Do something you want
-} else {
-   // Print the error
-   print(json["user"]["favourites_count"].error!)
-}
-```
+- [stjson-usage](skills/stjson-usage/SKILL.md)
+- [stjson-update](skills/stjson-update/SKILL.md)
+- [stjson-dev-feedback](skills/stjson-dev-feedback/SKILL.md)
 
-```swift
-// String
-if let id = json["user"]["name"].string {
-   // Do something you want
-} else {
-   // Print the error
-   print(json["user"]["name"].error!)
-}
-```
+These are the public agent-facing entry points. Repository-maintainer workflows live under [.agents/skills/](.agents/skills/README.md).
 
-```swift
-// Bool
-if let id = json["user"]["is_translator"].bool {
-   // Do something you want
-} else {
-   // Print the error
-   print(json["user"]["is_translator"].error!)
-}
-```
+## Examples
 
-```swift
-// Int
-if let id = json["user"]["id"].int {
-   // Do something you want
-} else {
-   // Print the error
-   print(json["user"]["id"].error!)
-}
-...
-```
-
-#### Non-optional getter
-
-Non-optional getter is named `xxxValue`
-
-```swift
-// If not a Number or nil, return 0
-let id: Int = json["id"].intValue
-```
-
-```swift
-// If not a String or nil, return ""
-let name: String = json["name"].stringValue
-```
-
-```swift
-// If not an Array or nil, return []
-let list: Array<JSON> = json["list"].arrayValue
-```
-
-```swift
-// If not a Dictionary or nil, return [:]
-let user: Dictionary<String, JSON> = json["user"].dictionaryValue
-```
-
-#### Setter
-
-```swift
-json["name"] = JSON("new-name")
-json[0] = JSON(1)
-```
-
-```swift
-json["id"].int =  1234567890
-json["coordinate"].double =  8766.766
-json["name"].string =  "Jack"
-json.arrayObject = [1,2,3,4]
-json.dictionaryObject = ["name":"Jack", "age":25]
-```
-
-#### Raw object
-
-```swift
-let rawObject: Any = json.object
-```
-
-```swift
-let rawValue: Any = json.rawValue
-```
-
-```swift
-//convert the JSON to raw NSData
-do {
-	let rawData = try json.rawData()
-  //Do something you want
-} catch {
-	print("Error \(error)")
-}
-```
-
-```swift
-//convert the JSON to a raw String
-if let rawString = json.rawString() {
-  //Do something you want
-} else {
-	print("json.rawString is nil")
-}
-```
-
-#### Existence
-
-```swift
-// shows you whether value specified in JSON or not
-if json["name"].exists()
-```
-
-#### Literal convertibles
-
-For more info about literal convertibles: [Swift Literal Convertibles](http://nshipster.com/swift-literal-convertible/)
-
-```swift
-// StringLiteralConvertible
-let json: JSON = "I'm a json"
-```
-
-```swift
-// IntegerLiteralConvertible
-let json: JSON =  12345
-```
-
-```swift
-// BooleanLiteralConvertible
-let json: JSON =  true
-```
-
-```swift
-// FloatLiteralConvertible
-let json: JSON =  2.8765
-```
-
-```swift
-// DictionaryLiteralConvertible
-let json: JSON =  ["I":"am", "a":"json"]
-```
-
-```swift
-// ArrayLiteralConvertible
-let json: JSON =  ["I", "am", "a", "json"]
-```
-
-```swift
-// With subscript in array
-var json: JSON =  [1,2,3]
-json[0] = 100
-json[1] = 200
-json[2] = 300
-json[999] = 300 // Don't worry, nothing will happen
-```
-
-```swift
-// With subscript in dictionary
-var json: JSON =  ["name": "Jack", "age": 25]
-json["name"] = "Mike"
-json["age"] = "25" // It's OK to set String
-json["address"] = "L.A." // Add the "address": "L.A." in json
-```
-
-```swift
-// Array & Dictionary
-var json: JSON =  ["name": "Jack", "age": 25, "list": ["a", "b", "c", ["what": "this"]]]
-json["list"][3]["what"] = "that"
-json["list",3,"what"] = "that"
-let path: [JSONSubscriptType] = ["list",3,"what"]
-json[path] = "that"
-```
-
-```swift
-// With other JSON objects
-let user: JSON = ["username" : "Steve", "password": "supersecurepassword"]
-let auth: JSON = [
-  "user": user.object, // use user.object instead of just user
-  "apikey": "supersecretapitoken"
-]
-```
-
-#### Merging
-
-It is possible to merge one JSON into another JSON. Merging a JSON into another JSON adds all non existing values to the original JSON which are only present in the `other` JSON.
-
-If both JSONs contain a value for the same key, _mostly_ this value gets overwritten in the original JSON, but there are two cases where it provides some special treatment:
-
-- In case of both values being a `JSON.Type.array` the values form the array found in the `other` JSON getting appended to the original JSON's array value.
-- In case of both values being a `JSON.Type.dictionary` both JSON-values are getting merged the same way the encapsulating JSON is merged.
-
-In a case where two fields in a JSON have different types, the value will get always overwritten.
-
-There are two different fashions for merging: `merge` modifies the original JSON, whereas `merged` works non-destructively on a copy.
-
-```swift
-let original: JSON = [
-    "first_name": "John",
-    "age": 20,
-    "skills": ["Coding", "Reading"],
-    "address": [
-        "street": "Front St",
-        "zip": "12345",
-    ]
-]
-
-let update: JSON = [
-    "last_name": "Doe",
-    "age": 21,
-    "skills": ["Writing"],
-    "address": [
-        "zip": "12342",
-        "city": "New York City"
-    ]
-]
-
-let updated = original.merge(with: update)
-// [
-//     "first_name": "John",
-//     "last_name": "Doe",
-//     "age": 21,
-//     "skills": ["Coding", "Reading", "Writing"],
-//     "address": [
-//         "street": "Front St",
-//         "zip": "12342",
-//         "city": "New York City"
-//     ]
-// ]
-```
-
-## String representation
-There are two options available:
-- use the default Swift one
-- use a custom one that will handle optionals well and represent `nil` as `"null"`:
-```swift
-let dict = ["1":2, "2":"two", "3": nil] as [String: Any?]
-let json = JSON(dict)
-let representation = json.rawString(options: [.castNilToNSNull: true])
-// representation is "{\"1\":2,\"2\":\"two\",\"3\":null}", which represents {"1":2,"2":"two","3":null}
-```
-
-## Work with [Alamofire](https://github.com/Alamofire/Alamofire)
-
-SwiftyJSON nicely wraps the result of the Alamofire JSON response handler:
-
-```swift
-Alamofire.request(url, method: .get).validate().responseJSON { response in
-    switch response.result {
-    case .success(let value):
-        let json = JSON(value)
-        print("JSON: \(json)")
-    case .failure(let error):
-        print(error)
-    }
-}
-```
-
-We also provide an extension of Alamofire for serializing NSData to SwiftyJSON's JSON.
-
-See: [Alamofire-SwiftyJSON](https://github.com/SwiftyJSON/Alamofire-SwiftyJSON)
-
-
-## Work with [Moya](https://github.com/Moya/Moya)
-
-SwiftyJSON parse data to JSON:
-
-```swift
-let provider = MoyaProvider<Backend>()
-provider.request(.showProducts) { result in
-    switch result {
-    case let .success(moyaResponse):
-        let data = moyaResponse.data
-        let json = JSON(data: data) // convert network data to json
-        print(json)
-    case let .failure(error):
-        print("error: \(error)")
-    }
-}
-
-```
-
-## SwiftyJSON Model Generator
-Tools to generate SwiftyJSON Models
-* [JSON Cafe](http://www.jsoncafe.com/)
-* [JSON Export](https://github.com/Ahmed-Ali/JSONExport)
+- [Examples/Package.swift](Examples/Package.swift)
+- [Examples/QuickStart.swift](Examples/QuickStart.swift)
+- [Examples/AnyCodableExample.swift](Examples/AnyCodableExample.swift)
+- [Examples/JSONLinesExample.swift](Examples/JSONLinesExample.swift)
+- [Examples/JSONRPCExample.swift](Examples/JSONRPCExample.swift)
