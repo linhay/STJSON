@@ -262,9 +262,47 @@ private func unwrap(_ object: Any) -> Any {
     switch object {
     case let json as JSON:
         return unwrap(json.object)
+    case let doubleArray as [Double]:
+        return doubleArray
+    case let intArray as [Int]:
+        return intArray
+    case let stringArray as [String]:
+        return stringArray
+    case let boolArray as [Bool]:
+        return boolArray
+    case let floatArray as [Float]:
+        return floatArray
+    case let stringDict as [String: String]:
+        return stringDict
+    case let intDict as [String: Int]:
+        return intDict
+    case let doubleDict as [String: Double]:
+        return doubleDict
+    case let boolDict as [String: Bool]:
+        return boolDict
     case let array as [Any]:
+        var needsUnwrap = false
+        for item in array {
+            if item is JSON || item is [Any] || item is [String: Any] {
+                needsUnwrap = true
+                break
+            }
+        }
+        if !needsUnwrap {
+            return array
+        }
         return array.map(unwrap)
     case let dictionary as [String: Any]:
+        var needsUnwrap = false
+        for value in dictionary.values {
+            if value is JSON || value is [Any] || value is [String: Any] {
+                needsUnwrap = true
+                break
+            }
+        }
+        if !needsUnwrap {
+            return dictionary
+        }
         var d = dictionary
         dictionary.forEach { pair in
             d[pair.key] = unwrap(pair.value)
@@ -793,7 +831,14 @@ extension JSON {
         get {
             switch type {
             case .string: return object as? String ?? ""
-            case .number: return rawNumber.stringValue
+            case .number:
+                if let intVal = rawNumber as? Int {
+                    return String(intVal)
+                } else if let doubleVal = rawNumber as? Double {
+                    return String(doubleVal)
+                } else {
+                    return rawNumber.stringValue
+                }
             case .bool:   return (object as? Bool).map { String($0) } ?? ""
             default:      return ""
             }
