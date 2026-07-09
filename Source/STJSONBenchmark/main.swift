@@ -3,6 +3,16 @@ import STJSON
 import SwiftyJSON
 
 // MARK: - Dataset Generators
+func generateNDJSONData() -> Data {
+    var lines: [String] = []
+    for i in 1...5000 {
+        let jsonStr = #"{"id":\#(i),"name":"user_\#(i)","active":\#(i % 2 == 0),"score":\#(Double(i) * 1.5)}"#
+        lines.append(jsonStr)
+    }
+    let ndjsonString = lines.joined(separator: "\n")
+    return ndjsonString.data(using: .utf8)!
+}
+
 func generateTwitterData() -> Data {
     var tweets: [[String: Any]] = []
     for i in 1...2000 {
@@ -85,7 +95,7 @@ func generateCanadaData() -> Data {
 func measure(iterations: Int, block: () -> Void) -> Double {
     // Warm up
     block()
-    
+
     let start = DispatchTime.now()
     for _ in 0..<iterations {
         block()
@@ -120,44 +130,51 @@ func run() {
     print("Preparing Datasets...")
     let twitterData = generateTwitterData()
     let canadaData = generateCanadaData()
+    let ndjsonData = generateNDJSONData()
+
+    let rawNDJSONObj: [[String: Any]] = try! JSONLines().compactMapLines(from: .data(ndjsonData)) { _, line in
+        try! JSONSerialization.jsonObject(with: line, options: []) as! [String: Any]
+    }
+    let stjsonNDJSONObj: [JSON] = try! JSONLines().decode(from: .data(ndjsonData))
+
     print("Datasets prepared.")
-    
+
     let iterations = 100
-    
+
     // ==========================================
     // TWITTER DATASET (API Response Benchmark)
     // ==========================================
-    
+
     // 1. Parse Benchmark
     printTableHead(title: "Twitter Parse", sizeBytes: twitterData.count)
-    
+
     var baselineTime = 1.0
-    
+
     let timeSerializationParse = measure(iterations: iterations) {
         let _ = try? JSONSerialization.jsonObject(with: twitterData, options: [])
     }
     baselineTime = timeSerializationParse
     printTableRow(name: "JSONSerialization", iterations: iterations, timeSec: timeSerializationParse, sizeBytes: twitterData.count, baselineTimeSec: baselineTime)
-    
+
     let timeSTJSONParse = measure(iterations: iterations) {
         let _ = try? STJSON.JSON(data: twitterData)
     }
     printTableRow(name: "STJSON", iterations: iterations, timeSec: timeSTJSONParse, sizeBytes: twitterData.count, baselineTimeSec: baselineTime)
-    
+
     let timeSwiftyJSONParse = measure(iterations: iterations) {
         let _ = try? SwiftyJSON.JSON(data: twitterData)
     }
     printTableRow(name: "SwiftyJSON", iterations: iterations, timeSec: timeSwiftyJSONParse, sizeBytes: twitterData.count, baselineTimeSec: baselineTime)
     printTableFoot()
-    
+
     // 2. Retrieval Benchmark
     printTableHead(title: "Twitter Retrieval (Value Access)", sizeBytes: twitterData.count)
-    
+
     // Parse objects once for retrieval test
     let rawObj = try! JSONSerialization.jsonObject(with: twitterData, options: [])
     let stjsonObj = try! STJSON.JSON(data: twitterData)
     let swiftyjsonObj = try! SwiftyJSON.JSON(data: twitterData)
-    
+
     let timeSerializationRetrieve = measure(iterations: iterations * 10) {
         if let dict = rawObj as? [String: Any],
            let statuses = dict["statuses"] as? [[String: Any]] {
@@ -176,7 +193,7 @@ func run() {
     }
     baselineTime = timeSerializationRetrieve
     printTableRow(name: "JSONSerialization", iterations: iterations * 10, timeSec: timeSerializationRetrieve, sizeBytes: twitterData.count, baselineTimeSec: baselineTime)
-    
+
     let timeSTJSONRetrieve = measure(iterations: iterations * 10) {
         let statuses = stjsonObj["statuses"]
         for k in [100, 500, 1000, 1500] {
@@ -200,7 +217,7 @@ func run() {
         }
     }
     printTableRow(name: "STJSON (Fast Path)", iterations: iterations * 10, timeSec: timeSTJSONFastRetrieve, sizeBytes: twitterData.count, baselineTimeSec: baselineTime)
-    
+
     let timeSwiftyJSONRetrieve = measure(iterations: iterations * 10) {
         let statuses = swiftyjsonObj["statuses"]
         for k in [100, 500, 1000, 1500] {
@@ -214,50 +231,104 @@ func run() {
     }
     printTableRow(name: "SwiftyJSON", iterations: iterations * 10, timeSec: timeSwiftyJSONRetrieve, sizeBytes: twitterData.count, baselineTimeSec: baselineTime)
     printTableFoot()
-    
+
     // 3. Stringify Benchmark
     printTableHead(title: "Twitter Stringify", sizeBytes: twitterData.count)
-    
+
     let timeSerializationStringify = measure(iterations: iterations) {
         let _ = try? JSONSerialization.data(withJSONObject: rawObj, options: [])
     }
     baselineTime = timeSerializationStringify
     printTableRow(name: "JSONSerialization", iterations: iterations, timeSec: timeSerializationStringify, sizeBytes: twitterData.count, baselineTimeSec: baselineTime)
-    
+
     let timeSTJSONStringify = measure(iterations: iterations) {
         let _ = try? stjsonObj.rawData()
     }
     printTableRow(name: "STJSON", iterations: iterations, timeSec: timeSTJSONStringify, sizeBytes: twitterData.count, baselineTimeSec: baselineTime)
-    
+
     let timeSwiftyJSONStringify = measure(iterations: iterations) {
         let _ = try? swiftyjsonObj.rawData()
     }
     printTableRow(name: "SwiftyJSON", iterations: iterations, timeSec: timeSwiftyJSONStringify, sizeBytes: twitterData.count, baselineTimeSec: baselineTime)
     printTableFoot()
-    
-    
+
+
     // ==========================================
     // CANADA DATASET (Float array Coordinates)
     // ==========================================
-    
+
     // 1. Parse Benchmark
     printTableHead(title: "Canada Parse (Floats)", sizeBytes: canadaData.count)
-    
+
     let timeSerializationCanadaParse = measure(iterations: iterations) {
         let _ = try? JSONSerialization.jsonObject(with: canadaData, options: [])
     }
     baselineTime = timeSerializationCanadaParse
     printTableRow(name: "JSONSerialization", iterations: iterations, timeSec: timeSerializationCanadaParse, sizeBytes: canadaData.count, baselineTimeSec: baselineTime)
-    
+
     let timeSTJSONCanadaParse = measure(iterations: iterations) {
         let _ = try? STJSON.JSON(data: canadaData)
     }
     printTableRow(name: "STJSON", iterations: iterations, timeSec: timeSTJSONCanadaParse, sizeBytes: canadaData.count, baselineTimeSec: baselineTime)
-    
+
     let timeSwiftyJSONCanadaParse = measure(iterations: iterations) {
         let _ = try? SwiftyJSON.JSON(data: canadaData)
     }
     printTableRow(name: "SwiftyJSON", iterations: iterations, timeSec: timeSwiftyJSONCanadaParse, sizeBytes: canadaData.count, baselineTimeSec: baselineTime)
+    printTableFoot()
+
+    // ==========================================
+    // NDJSON / JSONLINES DATASET
+    // ==========================================
+
+    // 1. NDJSON Parse Benchmark
+    printTableHead(title: "NDJSON / JSONLines Parse", sizeBytes: ndjsonData.count)
+
+    let timeSerializationNDJSONParse = measure(iterations: iterations) {
+        if let str = String(data: ndjsonData, encoding: .utf8) {
+            let lines = str.split(separator: "\n")
+            for line in lines {
+                if let lineData = String(line).data(using: .utf8) {
+                    let _ = try? JSONSerialization.jsonObject(with: lineData, options: [])
+                }
+            }
+        }
+    }
+    baselineTime = timeSerializationNDJSONParse
+    printTableRow(name: "JSONSerialization", iterations: iterations, timeSec: timeSerializationNDJSONParse, sizeBytes: ndjsonData.count, baselineTimeSec: baselineTime)
+
+    let timeSTJSONNDJSONParse = measure(iterations: iterations) {
+        let _ = try? JSONLines().decode(from: .data(ndjsonData))
+    }
+    printTableRow(name: "STJSON (JSONLines)", iterations: iterations, timeSec: timeSTJSONNDJSONParse, sizeBytes: ndjsonData.count, baselineTimeSec: baselineTime)
+    printTableFoot()
+
+    // 2. NDJSON Stringify Benchmark
+    printTableHead(title: "NDJSON / JSONLines Stringify", sizeBytes: ndjsonData.count)
+
+    let timeSerializationNDJSONStringify = measure(iterations: iterations) {
+        var parts: [Data] = []
+        for obj in rawNDJSONObj {
+            if let d = try? JSONSerialization.data(withJSONObject: obj, options: []) {
+                parts.append(d)
+            }
+        }
+        guard let separator = "\n".data(using: .utf8) else { return }
+        var result = Data()
+        for (index, part) in parts.enumerated() {
+            result.append(part)
+            if index < parts.count - 1 {
+                result.append(separator)
+            }
+        }
+    }
+    baselineTime = timeSerializationNDJSONStringify
+    printTableRow(name: "JSONSerialization", iterations: iterations, timeSec: timeSerializationNDJSONStringify, sizeBytes: ndjsonData.count, baselineTimeSec: baselineTime)
+
+    let timeSTJSONNDJSONStringify = measure(iterations: iterations) {
+        let _ = try? JSONLines().encode(stjsonNDJSONObj)
+    }
+    printTableRow(name: "STJSON (JSONLines)", iterations: iterations, timeSec: timeSTJSONNDJSONStringify, sizeBytes: ndjsonData.count, baselineTimeSec: baselineTime)
     printTableFoot()
 }
 
