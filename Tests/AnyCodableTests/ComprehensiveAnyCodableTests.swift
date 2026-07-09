@@ -118,4 +118,30 @@ class ComprehensiveAnyCodableTests: XCTestCase {
         // 编码不支持的非 Codable 类型应该抛出异常
         XCTAssertThrowsError(try encoder.encode(invalid))
     }
+
+    // MARK: - 解码分支类型顺序防御测试
+    func testDecodingTypeOrderingConstraint() throws {
+        let json = """
+        {
+            "integer": 42,
+            "float": 42.1,
+            "boolean": true
+        }
+        """.data(using: .utf8)!
+
+        let decoder = JSONDecoder()
+        let result = try decoder.decode([String: AnyCodable].self, from: json)
+
+        // 1. 确保整数 42 保持为 Int，不能被错判成 Double
+        XCTAssertTrue(result["integer"]?.value is Int)
+        XCTAssertEqual(result["integer"]?.value as? Int, 42)
+
+        // 2. 确保浮点数 42.1 保持为 Double，不能被错判成 Int
+        XCTAssertTrue(result["float"]?.value is Double)
+        XCTAssertEqual(result["float"]?.value as? Double, 42.1)
+
+        // 3. 确保布尔值 true 保持为 Bool，不能被错判成 Int
+        XCTAssertTrue(result["boolean"]?.value is Bool)
+        XCTAssertEqual(result["boolean"]?.value as? Bool, true)
+    }
 }
