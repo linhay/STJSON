@@ -959,7 +959,12 @@ extension JSON {
 
     public var double: Double? {
         get {
-            return number?.doubleValue
+            switch type {
+            case .number: return rawNumber.doubleValue
+            case .bool:   return rawBool ? 1.0 : 0.0
+            case .string: return Double(rawString)
+            default:      return nil
+            }
         }
         set {
             if let newValue = newValue {
@@ -972,7 +977,12 @@ extension JSON {
 
     public var doubleValue: Double {
         get {
-            return numberValue.doubleValue
+            switch type {
+            case .number: return rawNumber.doubleValue
+            case .bool:   return rawBool ? 1.0 : 0.0
+            case .string: return Double(rawString) ?? 0.0
+            default:      return 0.0
+            }
         }
         set {
             object = NSNumber(value: newValue)
@@ -981,7 +991,12 @@ extension JSON {
 
     public var float: Float? {
         get {
-            return number?.floatValue
+            switch type {
+            case .number: return rawNumber.floatValue
+            case .bool:   return rawBool ? 1.0 : 0.0
+            case .string: return Float(rawString)
+            default:      return nil
+            }
         }
         set {
             if let newValue = newValue {
@@ -994,7 +1009,12 @@ extension JSON {
 
     public var floatValue: Float {
         get {
-            return numberValue.floatValue
+            switch type {
+            case .number: return rawNumber.floatValue
+            case .bool:   return rawBool ? 1.0 : 0.0
+            case .string: return Float(rawString) ?? 0.0
+            default:      return 0.0
+            }
         }
         set {
             object = NSNumber(value: newValue)
@@ -1003,7 +1023,14 @@ extension JSON {
 
     public var int: Int? {
         get {
-            return number?.intValue
+            switch type {
+            case .number: return rawNumber.intValue
+            case .bool:   return rawBool ? 1 : 0
+            case .string:
+                if let intVal = Int(rawString) { return intVal }
+                return Double(rawString).map { Int($0) }
+            default:      return nil
+            }
         }
         set {
             if let newValue = newValue {
@@ -1016,7 +1043,14 @@ extension JSON {
 
     public var intValue: Int {
         get {
-            return numberValue.intValue
+            switch type {
+            case .number: return rawNumber.intValue
+            case .bool:   return rawBool ? 1 : 0
+            case .string:
+                if let intVal = Int(rawString) { return intVal }
+                return Double(rawString).map { Int($0) } ?? 0
+            default:      return 0
+            }
         }
         set {
             object = NSNumber(value: newValue)
@@ -1025,7 +1059,14 @@ extension JSON {
 
     public var uInt: UInt? {
         get {
-            return number?.uintValue
+            switch type {
+            case .number: return rawNumber.uintValue
+            case .bool:   return rawBool ? 1 : 0
+            case .string:
+                if let uintVal = UInt(rawString) { return uintVal }
+                return Double(rawString).map { UInt($0) }
+            default:      return nil
+            }
         }
         set {
             if let newValue = newValue {
@@ -1038,7 +1079,14 @@ extension JSON {
 
     public var uIntValue: UInt {
         get {
-            return numberValue.uintValue
+            switch type {
+            case .number: return rawNumber.uintValue
+            case .bool:   return rawBool ? 1 : 0
+            case .string:
+                if let uintVal = UInt(rawString) { return uintVal }
+                return Double(rawString).map { UInt($0) } ?? 0
+            default:      return 0
+            }
         }
         set {
             object = NSNumber(value: newValue)
