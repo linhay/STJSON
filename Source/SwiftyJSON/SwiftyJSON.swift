@@ -553,11 +553,14 @@ extension JSON: Swift.RawRepresentable {
     }
 
     public func rawData(options opt: JSONSerialization.WritingOptions = JSONSerialization.WritingOptions(rawValue: 0)) throws -> Data {
-        guard JSONSerialization.isValidJSONObject(object) else {
+        guard type == .dictionary || type == .array else {
             throw SwiftyJSONError.invalidJSON
         }
-
-        return try JSONSerialization.data(withJSONObject: object, options: opt)
+        do {
+            return try JSONSerialization.data(withJSONObject: object, options: opt)
+        } catch {
+            throw SwiftyJSONError.invalidJSON
+        }
 	}
 
 	public func rawString(_ encoding: String.Encoding = .utf8, options opt: JSONSerialization.WritingOptions = .prettyPrinted) -> String? {

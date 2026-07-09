@@ -134,6 +134,22 @@ class PerformanceTests: XCTestCase {
             }
         }
     }
+
+    func testFastPathRetrievalPerformance() {
+        guard let json = try? JSON(data: self.testData) else {
+            XCTFail("Unable to parse testData")
+            return
+        }
+        self.measure {
+            for _ in 1...100 {
+                autoreleasepool {
+                    let name = json.string(at: 0, "name")
+                    let id = json.int(at: 0, "id")
+                    let _ = (name, id)
+                }
+            }
+        }
+    }
 }
 
 #if !canImport(ObjectiveC)
