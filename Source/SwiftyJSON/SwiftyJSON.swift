@@ -91,7 +91,7 @@ public struct JSON {
 	 */
     public init(data: Data, options opt: JSONSerialization.ReadingOptions = []) throws {
         let object: Any = try JSONSerialization.jsonObject(with: data, options: opt)
-        self.init(jsonObject: object)
+        self.init(rawJsonObject: object)
     }
 
     /**
@@ -139,6 +139,36 @@ public struct JSON {
 	 */
     fileprivate init(jsonObject: Any) {
         object = jsonObject
+    }
+
+    fileprivate init(rawJsonObject: Any) {
+        error = nil
+        switch rawJsonObject {
+        case let number as NSNumber:
+            if number.isBool {
+                type = .bool
+                rawBool = number.boolValue
+            } else {
+                type = .number
+                rawNumber = number
+            }
+        case let string as String:
+            type = .string
+            rawString = string
+        case _ as NSNull:
+            type = .null
+        case Optional<Any>.none:
+            type = .null
+        case let array as [Any]:
+            type = .array
+            rawArray = array
+        case let dictionary as [String: Any]:
+            type = .dictionary
+            rawDictionary = dictionary
+        default:
+            type = .unknown
+            error = SwiftyJSONError.unsupportedType
+        }
     }
 
 	/**
@@ -257,6 +287,10 @@ public struct JSON {
     public static var null: JSON { return JSON(NSNull()) }
 }
 
+private protocol JSONContainerBypassable {}
+extension Array: JSONContainerBypassable {}
+extension Dictionary: JSONContainerBypassable {}
+
 /// Private method to unwarp an object recursively
 private func unwrap(_ object: Any) -> Any {
     switch object {
@@ -283,7 +317,7 @@ private func unwrap(_ object: Any) -> Any {
     case let array as [Any]:
         var needsUnwrap = false
         for item in array {
-            if item is JSON || item is [Any] || item is [String: Any] {
+            if item is JSON || item is JSONContainerBypassable {
                 needsUnwrap = true
                 break
             }
@@ -295,7 +329,7 @@ private func unwrap(_ object: Any) -> Any {
     case let dictionary as [String: Any]:
         var needsUnwrap = false
         for value in dictionary.values {
-            if value is JSON || value is [Any] || value is [String: Any] {
+            if value is JSON || value is JSONContainerBypassable {
                 needsUnwrap = true
                 break
             }
