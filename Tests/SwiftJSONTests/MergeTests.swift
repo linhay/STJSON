@@ -94,4 +94,75 @@ class MergeTests: XCTestCase {
 
         XCTAssertEqual(try! A.merged(with: B), B)
     }
+
+    func testMergeDeepNestedStructures() {
+        let A = JSON([
+            "users": [
+                ["name": "Alice"],
+                ["name": "Bob"]
+            ],
+            "meta": [
+                "count": 2
+            ]
+        ])
+
+        let B = JSON([
+            "users": [
+                ["name": "Charlie"]
+            ],
+            "meta": [
+                "page": 1
+            ]
+        ])
+
+        let expected = JSON([
+            "users": [
+                ["name": "Alice"],
+                ["name": "Bob"],
+                ["name": "Charlie"]
+            ],
+            "meta": [
+                "count": 2,
+                "page": 1
+            ]
+        ])
+
+        XCTAssertEqual(try! A.merged(with: B), expected)
+    }
+
+    func testMergeTypeCollisionInNestedLevels() {
+        let A = JSON([
+            "config": [
+                "timeout": 30
+            ]
+        ])
+
+        let B = JSON([
+            "config": "default"
+        ])
+
+        // 顶层相同，但深层类型冲突，应当以 B 的新类型直接覆盖 A 冲突子项，不抛出错误
+        let result = try! A.merged(with: B)
+        XCTAssertEqual(result["config"].stringValue, "default")
+    }
+
+    func testMergeWithNull() {
+        let A = JSON.null
+        let B = JSON.null
+        XCTAssertEqual(try! A.merged(with: B), JSON.null)
+
+        // 顶层类型不同（null 与 dict），应抛出 wrongType 错误
+        let C = JSON(["a": 1])
+        XCTAssertThrowsError(try A.merged(with: C))
+
+        // 深层包含 null
+        let D = JSON([
+            "data": JSON.null
+        ])
+        let E = JSON([
+            "data": ["id": 100]
+        ])
+        let result = try! D.merged(with: E)
+        XCTAssertEqual(result["data"]["id"].intValue, 100)
+    }
 }

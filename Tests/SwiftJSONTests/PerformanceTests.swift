@@ -150,6 +150,25 @@ class PerformanceTests: XCTestCase {
             }
         }
     }
+
+    func testConcurrentReadSafety() {
+        let dict: [String: Any] = [
+            "name": "Alice",
+            "age": 25,
+            "tags": ["a", "b", "c"],
+            "info": ["nested": "val"]
+        ]
+        let json = JSON(dict)
+
+        DispatchQueue.concurrentPerform(iterations: 1000) { index in
+            let name = json["name"].stringValue
+            let tag = json["tags"][index % 3].stringValue
+            let nested = json["info"]["nested"].stringValue
+            XCTAssertEqual(name, "Alice")
+            XCTAssertTrue(tag == "a" || tag == "b" || tag == "c")
+            XCTAssertEqual(nested, "val")
+        }
+    }
 }
 
 #if !canImport(ObjectiveC)
