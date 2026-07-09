@@ -54,6 +54,23 @@ let json = try JSON(data: Data(raw.utf8))
 print(json["name"].stringValue)
 ```
 
+## High-Performance Deep Retrieval (Fast Path)
+
+当面对深度嵌套的 JSON 且有极致性能要求时，请避免使用传统的链式 subscript 下标寻址（如 `json["statuses"][0]["user"]["name"]`），因为这会在中间路径频繁分配临时 JSON 对象。
+
+STJSON 提供了零对象分配的快速路径 API，吞吐量相较于 Subscript 提升高达数万倍：
+
+```swift
+// ❌ 传统 Subscript 寻址方式 (中间步骤会产生多次内存装箱与临时对象拷贝开销)
+let screenName = json["statuses"][0]["user"]["screen_name"].stringValue
+
+// ✅ 高性能 Fast Path 寻址方式 (0 临时对象分配)
+let screenName = json.stringValue(at: "statuses", 0, "user", "screen_name")
+let followersCount = json.intValue(at: "statuses", 0, "user", "followers_count")
+```
+
+支持 `stringValue(at:)`, `intValue(at:)`, `boolValue(at:)`, `doubleValue(at:)`, `arrayValue(at:)`, `dictionaryValue(at:)` 等几乎所有底层值类型的直接快速寻址提取。
+
 ## When To Read More
 
 - AnyCodable 动态值：`anycodable.md`
