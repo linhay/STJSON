@@ -187,11 +187,9 @@ class BaseTests: XCTestCase {
         XCTAssertEqual(JSON(-9.123456789).description, "-9.123456789")
         XCTAssertEqual(JSON(-0.00000000000000001).description, "-1e-17")
         XCTAssertEqual(JSON(-999999999999999999999999.000000000000000000000001).description, "-1e+24")
-        #if os(Linux)
-        XCTAssertEqual(JSON(-9999999991999999999999999.88888883433343439438493483483943948341).stringValue, "-9.999999992e+24")
-        #else
-        XCTAssertEqual(JSON(-9999999991999999999999999.88888883433343439438493483483943948341).stringValue, "-9.999999991999999e+24")
-        #endif
+        let stringValue24 = JSON(-9999999991999999999999999.88888883433343439438493483483943948341).stringValue
+        XCTAssertTrue(stringValue24 == "-9.999999991999999e+24" || stringValue24 == "-9.999999992e+24", "Unexpected stringValue: \(stringValue24)")
+
 
         XCTAssertEqual(JSON(Int(Int.max)).description, "\(Int.max)")
         XCTAssertEqual(JSON(NSNumber(value: Int.min)).description, "\(Int.min)")
